@@ -113,14 +113,14 @@ export default async function Home() {
             />
           </Panel>
 
-          <footer className="text-xs text-slate-500">
+          {/* <footer className="text-xs text-slate-500">
             Emulator must use{" "}
             <code className="text-slate-300">http://10.0.2.2:3000/</code> as the
             analytics URL.{" "}
             <Link href="/api/health" className="text-indigo-300 hover:underline">
               API health
             </Link>
-          </footer>
+          </footer> */}
           </main>
         </div>
       </AnalyticsRefreshProvider>
