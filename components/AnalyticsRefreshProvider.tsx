@@ -5,13 +5,16 @@ import {
   useCallback,
   useContext,
   useRef,
+  useState,
+  useTransition,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
 
 type AnalyticsRefreshContextValue = {
-  registerTableRefresh: (refresh: () => void) => () => void;
+  registerTableRefresh: (refresh: () => void | Promise<void>) => () => void;
   refreshDashboard: () => void;
+  isRefreshing: boolean;
 };
 
 const AnalyticsRefreshContext =
@@ -19,27 +22,44 @@ const AnalyticsRefreshContext =
 
 export function AnalyticsRefreshProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const tableRefreshRef = useRef<(() => void) | null>(null);
+  const tableRefreshRef = useRef<(() => void | Promise<void>) | null>(null);
+  const [isTableRefreshing, setIsTableRefreshing] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const registerTableRefresh = useCallback((refresh: () => void) => {
-    tableRefreshRef.current = refresh;
-    return () => {
-      if (tableRefreshRef.current === refresh) {
-        tableRefreshRef.current = null;
-      }
-    };
-  }, []);
+  const registerTableRefresh = useCallback(
+    (refresh: () => void | Promise<void>) => {
+      tableRefreshRef.current = refresh;
+      return () => {
+        if (tableRefreshRef.current === refresh) {
+          tableRefreshRef.current = null;
+        }
+      };
+    },
+    [],
+  );
 
   const refreshDashboard = useCallback(() => {
-    tableRefreshRef.current?.();
-    router.refresh();
+    setIsTableRefreshing(true);
+
+    Promise.resolve(tableRefreshRef.current?.())
+      .catch(() => undefined)
+      .finally(() => {
+        setIsTableRefreshing(false);
+      });
+
+    startTransition(() => {
+      router.refresh();
+    });
   }, [router]);
+
+  const isRefreshing = isPending || isTableRefreshing;
 
   return (
     <AnalyticsRefreshContext.Provider
-      value={{ registerTableRefresh, refreshDashboard }}
+      value={{ registerTableRefresh, refreshDashboard, isRefreshing }}
     >
       {children}
+      {isRefreshing ? <ScreenLoadingOverlay /> : null}
     </AnalyticsRefreshContext.Provider>
   );
 }
@@ -52,4 +72,41 @@ export function useAnalyticsRefresh() {
     );
   }
   return context;
+}
+
+function ScreenLoadingOverlay() {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+      role="status"
+      aria-live="polite"
+      aria-label="Refreshing dashboard"
+    >
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-100 shadow-2xl">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          className="h-8 w-8 animate-spin text-indigo-300"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            stroke="currentColor"
+            strokeOpacity="0.25"
+            strokeWidth="2.5"
+          />
+          <path
+            d="M21 12a9 9 0 0 0-9-9"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+        </svg>
+        <p className="text-sm text-slate-300">Refreshing…</p>
+      </div>
+    </div>
+  );
 }

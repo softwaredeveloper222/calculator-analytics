@@ -23,7 +23,7 @@ const PAGE_SIZES = [10, 25, 50] as const;
 
 export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
   const router = useRouter();
-  const { registerTableRefresh } = useAnalyticsRefresh();
+  const { registerTableRefresh, isRefreshing } = useAnalyticsRefresh();
   const [events, setEvents] = useState(initialData.events);
   const [pagination, setPagination] = useState(initialData.pagination);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -51,9 +51,9 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
   }, []);
 
   useEffect(() => {
-    return registerTableRefresh(() => {
-      void loadPage(pagination.page, pagination.pageSize);
-    });
+    return registerTableRefresh(() =>
+      loadPage(pagination.page, pagination.pageSize),
+    );
   }, [
     registerTableRefresh,
     loadPage,
@@ -139,6 +139,8 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
   }, [selectedIds, pagination.page, pagination.pageSize, loadPage, router]);
 
   const busy = isLoading || isDeleting;
+  // Full-screen overlay covers refresh; keep table overlay for pagination/delete only.
+  const showTableOverlay = busy && !isRefreshing;
 
   if (initialData.events.length === 0 && events.length === 0 && !busy) {
     return (
@@ -187,9 +189,11 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
       <div className="relative min-h-32">
         <div
           className={
-            busy ? "pointer-events-none opacity-40 transition-opacity" : ""
+            showTableOverlay
+              ? "pointer-events-none opacity-40 transition-opacity"
+              : ""
           }
-          aria-hidden={busy}
+          aria-hidden={showTableOverlay}
         >
           <EventHistoryTable
             events={events}
@@ -199,7 +203,7 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
           />
         </div>
 
-        {busy ? (
+        {showTableOverlay ? (
           <div
             className="absolute inset-0 flex items-center justify-center rounded-lg bg-slate-950/50"
             role="status"
