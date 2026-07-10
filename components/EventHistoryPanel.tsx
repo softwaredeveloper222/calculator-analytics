@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAnalyticsRefresh } from "@/components/AnalyticsRefreshProvider";
 import {
   EventHistoryTable,
@@ -27,11 +27,12 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
   const [events, setEvents] = useState(initialData.events);
   const [pagination, setPagination] = useState(initialData.pagination);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadPage = useCallback((page: number, pageSize: number) => {
-    startTransition(async () => {
+  const loadPage = useCallback(async (page: number, pageSize: number) => {
+    setIsLoading(true);
+    try {
       const params = new URLSearchParams({
         page: String(page),
         pageSize: String(pageSize),
@@ -44,12 +45,14 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
       setEvents(data.events);
       setPagination(data.pagination);
       setSelectedIds(new Set());
-    });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     return registerTableRefresh(() => {
-      loadPage(pagination.page, pagination.pageSize);
+      void loadPage(pagination.page, pagination.pageSize);
     });
   }, [
     registerTableRefresh,
@@ -122,7 +125,7 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
         const data: HistoryData = await reload.json();
 
         if (data.events.length === 0 && data.pagination.page > 1) {
-          loadPage(data.pagination.page - 1, data.pagination.pageSize);
+          await loadPage(data.pagination.page - 1, data.pagination.pageSize);
         } else {
           setEvents(data.events);
           setPagination(data.pagination);
@@ -135,9 +138,9 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
     }
   }, [selectedIds, pagination.page, pagination.pageSize, loadPage, router]);
 
-  const busy = isPending || isDeleting;
+  const busy = isLoading || isDeleting;
 
-  if (initialData.events.length === 0 && events.length === 0) {
+  if (initialData.events.length === 0 && events.length === 0 && !busy) {
     return (
       <p className="text-sm text-slate-500">
         No events yet. Open Calculators in the app, tap Calculate, then refresh
@@ -168,7 +171,7 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
               key={size}
               type="button"
               disabled={busy}
-              onClick={() => loadPage(1, size)}
+              onClick={() => void loadPage(1, size)}
               className={`rounded-md px-2 py-1 ${
                 pagination.pageSize === size
                   ? "bg-indigo-500 text-white"
@@ -181,23 +184,71 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
         </div>
       </div>
 
-      <div className={busy ? "opacity-60 transition-opacity" : ""}>
-        <EventHistoryTable
-          events={events}
-          selectedIds={selectedIds}
-          onToggle={toggleSelection}
-          onToggleAll={toggleSelectAll}
-        />
+      <div className="relative min-h-32">
+        <div
+          className={
+            busy ? "pointer-events-none opacity-40 transition-opacity" : ""
+          }
+          aria-hidden={busy}
+        >
+          <EventHistoryTable
+            events={events}
+            selectedIds={selectedIds}
+            onToggle={toggleSelection}
+            onToggleAll={toggleSelectAll}
+          />
+        </div>
+
+        {busy ? (
+          <div
+            className="absolute inset-0 flex items-center justify-center rounded-lg bg-slate-950/50"
+            role="status"
+            aria-live="polite"
+            aria-label={isDeleting ? "Deleting events" : "Loading events"}
+          >
+            <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 shadow-lg">
+              <SpinnerIcon />
+              <span>{isDeleting ? "Deleting…" : "Loading…"}</span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-6">
         <Pagination
           pagination={pagination}
           disabled={busy}
-          onPageChange={(page) => loadPage(page, pagination.pageSize)}
+          onPageChange={(page) => void loadPage(page, pagination.pageSize)}
         />
       </div>
     </>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="none"
+      className="h-4 w-4 animate-spin text-indigo-300"
+      aria-hidden="true"
+    >
+      <circle
+        cx="10"
+        cy="10"
+        r="7"
+        stroke="currentColor"
+        strokeOpacity="0.25"
+        strokeWidth="2"
+      />
+      <path
+        d="M17 10a7 7 0 0 0-7-7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
