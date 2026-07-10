@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AnalyticsEvent {
+  id                 String   @id @default(cuid())
+  event              String
+  calculatorId       String?
+  sessionId          String
+  deviceId           String
+  appVersion         String?
+  platform           String   @default("android")
+  deviceManufacturer String?
+  deviceModel        String?
+  deviceBrand        String?
+  osVersion          String?
+  durationMs         Int?
+  success            Boolean?
+  metadata           String?
+  createdAt          DateTime @default(now())
+
+  @@index([calculatorId, createdAt])
+  @@index([event, createdAt])
+  @@index([deviceId])
+  @@index([deviceManufacturer, deviceModel])
+}
