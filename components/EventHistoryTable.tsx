@@ -1,4 +1,5 @@
 import { formatEventLabel } from "@/lib/event-labels";
+import { formatEventTime } from "@/lib/format-time";
 
 export type EventRow = {
   id: string;
@@ -9,10 +10,6 @@ export type EventRow = {
   success: boolean | null;
   createdAt: string;
 };
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleString();
-}
 
 type EventHistoryTableProps = {
   events: EventRow[];
@@ -85,7 +82,7 @@ export function EventHistoryTable({
                   />
                 </td>
                 <td className="py-2 pr-4 whitespace-nowrap">
-                  {formatTime(event.createdAt)}
+                  {formatEventTime(event.createdAt)}
                 </td>
                 <td className="py-2 pr-4">{formatEventLabel(event.event)}</td>
                 <td className="py-2 pr-4">{event.calculatorId ?? "—"}</td>
