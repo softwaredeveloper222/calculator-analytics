@@ -27,7 +27,7 @@ export default async function Home() {
                   Usage Dashboard
                 </h1>
                 <p className="text-sm text-slate-400">
-                  Live data from the Android app. Use pagination below to browse
+                  Live data from the mobile app. Use pagination below to browse
                   past events.
                 </p>
               </div>
