@@ -77,9 +77,9 @@ export function SafetyDaysPreview({
           className="space-y-4 px-6 py-8 sm:px-10"
           style={{ background: styles.pageBg }}
         >
-          {/* entry-title: 28px / 600 / #00387d */}
+          {/* entry-title: left-aligned, site sizes */}
           <h1
-            className="text-center text-[28px] font-bold leading-[1.5]"
+            className="text-left text-[28px] font-bold leading-[1.5]"
             style={{ color: styles.heading }}
           >
             {title || "Ammonia Safety Days"}
@@ -94,7 +94,7 @@ export function SafetyDaysPreview({
             />
           ) : null}
 
-          {/* h3 centered subtitle: 22px / 500 */}
+          {/* h3 centered subtitle */}
           {subtitle ? (
             <h3
               className="text-center text-[22px] font-medium leading-[1.5]"
