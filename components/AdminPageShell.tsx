@@ -9,6 +9,7 @@ export function AdminPageShell({
   description,
   actions,
   children,
+  wide = false,
 }: {
   current: "hub" | "analytics" | "notifications";
   eyebrow: string;
@@ -16,10 +17,17 @@ export function AdminPageShell({
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
+  wide?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12">
+      <main
+        className={
+          wide
+            ? "mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-3 py-12 sm:px-4 lg:px-5"
+            : "mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12"
+        }
+      >
         <AdminNav current={current} />
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-2">

@@ -80,7 +80,15 @@ export function NavigationLoadingProvider({
 
   return (
     <NavigationLoadingContext.Provider value={{ startNavigation }}>
-      {children}
+      <div
+        className={
+          isNavigating
+            ? "opacity-40 transition-opacity duration-200"
+            : "opacity-100 transition-opacity duration-300"
+        }
+      >
+        {children}
+      </div>
       {isNavigating ? <PageLoadingSpinner label="Loading page…" /> : null}
     </NavigationLoadingContext.Provider>
   );

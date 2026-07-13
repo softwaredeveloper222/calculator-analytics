@@ -14,6 +14,7 @@ export default function NotificationsPage() {
       eyebrow="Notification"
       title="Safety Days CMS"
       description="Edit Ammonia Safety Day content, save drafts, then notify the mobile app when ready."
+      wide
     >
       <SuspendedSection fallbackLabel="Loading Safety Days CMS…">
         <NotificationsBody />

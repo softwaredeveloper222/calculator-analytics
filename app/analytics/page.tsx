@@ -20,6 +20,7 @@ export default function AnalyticsPage() {
         title="Usage Dashboard"
         description="Live data from the mobile app. Use pagination below to browse past events."
         actions={<RefreshButton />}
+        wide
       >
         <SuspendedSection fallbackLabel="Loading analytics…">
           <AnalyticsBody />

@@ -160,7 +160,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
+    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
       <form onSubmit={handleSave} className="space-y-4">
         <Field label="Title" value={title} onChange={setTitle} required />
         <Field label="Subtitle" value={subtitle} onChange={setSubtitle} multiline />
