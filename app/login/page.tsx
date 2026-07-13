@@ -10,19 +10,19 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-slate-100">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-slate-800 bg-slate-900 p-8">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-300">
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 py-12 text-slate-100">
+      <div className="w-full max-w-2xl space-y-8 rounded-2xl border border-slate-800 bg-slate-900 p-10 sm:p-12">
+        <div className="space-y-3">
+          <p className="text-center text-base font-medium uppercase tracking-[0.2em] text-indigo-300">
             GCAP Admin
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-4xl font-semibold tracking-tight">Sign in</h1>
+          <p className="text-base leading-relaxed text-slate-400">
             Manage Safety Days notifications and calculator analytics.
           </p>
         </div>
 
-        <Suspense fallback={<p className="text-sm text-slate-400">Loading…</p>}>
+        <Suspense fallback={<p className="text-base text-slate-400">Loading…</p>}>
           <LoginForm />
         </Suspense>
       </div>

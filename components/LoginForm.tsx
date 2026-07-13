@@ -45,9 +45,9 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="username" className="block text-sm text-slate-300">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2.5">
+        <label htmlFor="username" className="block text-base text-slate-300">
           Username
         </label>
         <input
@@ -56,13 +56,13 @@ export function LoginForm() {
           autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 outline-none focus:border-indigo-400"
           required
         />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-slate-300">
+      <div className="space-y-2.5">
+        <label htmlFor="password" className="block text-base text-slate-300">
           Password
         </label>
         <input
@@ -72,13 +72,13 @@ export function LoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 outline-none focus:border-indigo-400"
           required
         />
       </div>
 
       {error ? (
-        <p className="text-sm text-rose-300" role="alert">
+        <p className="text-base text-rose-300" role="alert">
           {error}
         </p>
       ) : null}
@@ -86,7 +86,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-lg bg-indigo-500 px-5 py-3.5 text-base font-medium text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? "Signing in…" : "Sign in"}
       </button>
