@@ -25,7 +25,6 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   );
   const [registerUrl, setRegisterUrl] = useState(initialData.registerUrl ?? "");
   const [hotelsUrl, setHotelsUrl] = useState(initialData.hotelsUrl ?? "");
-  const [bodyHtml, setBodyHtml] = useState(initialData.bodyHtml ?? "");
   const [heroImageUrl, setHeroImageUrl] = useState(
     initialData.heroImageUrl ?? "",
   );
@@ -60,7 +59,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
     bullets,
     registerUrl: registerUrl || null,
     hotelsUrl: hotelsUrl || null,
-    bodyHtml: bodyHtml || null,
+    bodyHtml: null,
     heroImageUrl: heroImageUrl || null,
     images: images.filter((image) => image.url.trim()),
   };
@@ -162,7 +161,42 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   return (
     <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
       <form onSubmit={handleSave} className="space-y-4">
-        <Field label="Title" value={title} onChange={setTitle} required />
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={isSaving || isNotifying}
+            className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-200 hover:bg-slate-900 disabled:opacity-50"
+          >
+            {isSaving ? "Saving…" : "Save"}
+          </button>
+          <button
+            type="button"
+            onClick={handleNotify}
+            disabled={isSaving || isNotifying}
+            className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-50"
+          >
+            {isNotifying ? "Notifying…" : "Notify"}
+          </button>
+        </div>
+
+        <p className="text-xs text-slate-500">
+          Version {version}
+          {publishedAt
+            ? ` · Published ${new Date(publishedAt).toUTCString()}`
+            : " · Not published yet"}
+          {updatedAt ? ` · Updated ${new Date(updatedAt).toUTCString()}` : ""}
+        </p>
+
+        {status ? <p className="text-sm text-emerald-300">{status}</p> : null}
+        {error ? (
+          <p className="text-sm text-rose-300" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="border-t border-slate-800 pt-4">
+          <Field label="Title" value={title} onChange={setTitle} required />
+        </div>
         <Field label="Subtitle" value={subtitle} onChange={setSubtitle} multiline />
         <Field label="Event name" value={eventName} onChange={setEventName} />
         <Field label="Date" value={dateLabel} onChange={setDateLabel} />
@@ -261,47 +295,6 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
             </div>
           )}
         </div>
-
-        <Field
-          label="Extra body / notes"
-          value={bodyHtml}
-          onChange={setBodyHtml}
-          multiline
-          rows={5}
-        />
-
-        <div className="flex flex-wrap gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={isSaving || isNotifying}
-            className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-200 hover:bg-slate-900 disabled:opacity-50"
-          >
-            {isSaving ? "Saving…" : "Save"}
-          </button>
-          <button
-            type="button"
-            onClick={handleNotify}
-            disabled={isSaving || isNotifying}
-            className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-50"
-          >
-            {isNotifying ? "Notifying…" : "Notify"}
-          </button>
-        </div>
-
-        <p className="text-xs text-slate-500">
-          Version {version}
-          {publishedAt
-            ? ` · Published ${new Date(publishedAt).toUTCString()}`
-            : " · Not published yet"}
-          {updatedAt ? ` · Updated ${new Date(updatedAt).toUTCString()}` : ""}
-        </p>
-
-        {status ? <p className="text-sm text-emerald-300">{status}</p> : null}
-        {error ? (
-          <p className="text-sm text-rose-300" role="alert">
-            {error}
-          </p>
-        ) : null}
       </form>
 
       <SafetyDaysPreview
@@ -315,7 +308,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
         bullets={bullets}
         registerUrl={registerUrl}
         hotelsUrl={hotelsUrl}
-        bodyHtml={bodyHtml}
+        bodyHtml=""
         heroImageUrl={heroImageUrl}
         images={images}
       />
