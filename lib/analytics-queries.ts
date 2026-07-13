@@ -121,16 +121,11 @@ export async function getAnalyticsOverview(from?: Date, to?: Date) {
 
   const [
     totalEvents,
-    uniqueDevices,
     opensByCalculator,
     eventsByType,
     devicesRaw,
   ] = await Promise.all([
     prisma.analyticsEvent.count({ where }),
-    prisma.analyticsEvent.groupBy({
-      by: ["deviceId"],
-      where,
-    }),
     prisma.analyticsEvent.groupBy({
       by: ["calculatorId"],
       where: {
@@ -154,6 +149,8 @@ export async function getAnalyticsOverview(from?: Date, to?: Date) {
       orderBy: { _count: { deviceId: "desc" } },
     }),
   ]);
+
+  const uniqueDevices = devicesRaw;
 
   const deviceIds = devicesRaw.map((row) => row.deviceId);
   const latestDeviceEvents =

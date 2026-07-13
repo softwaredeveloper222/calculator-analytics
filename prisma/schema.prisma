@@ -30,3 +30,23 @@ model AnalyticsEvent {
   @@index([deviceId])
   @@index([deviceManufacturer, deviceModel])
 }
+
+model NotificationPage {
+  id             String    @id @default("safety-days")
+  title          String
+  subtitle       String?
+  eventName      String?
+  dateLabel      String?
+  location       String?
+  priceAttendee  String?
+  priceExhibitor String?
+  bullets        String
+  registerUrl    String?
+  hotelsUrl      String?
+  bodyHtml       String?
+  heroImageUrl   String?
+  images         String    @default("[]")
+  version        Int       @default(1)
+  publishedAt    DateTime?
+  updatedAt      DateTime  @updatedAt
+}

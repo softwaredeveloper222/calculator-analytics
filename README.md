@@ -30,7 +30,7 @@ npm run db:push
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the dashboard.
+Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the admin login.
 
 ## Environment
 
@@ -38,9 +38,28 @@ Open [http://localhost:3000](http://localhost:3000) for the dashboard.
 |----------|-------------|
 | `DATABASE_URL` | Supabase **transaction pooler** connection string (port 6543). Used at runtime on Vercel. |
 | `DIRECT_URL` | Supabase **direct** connection string (port 5432). Used for `prisma db push` from your machine. |
-| `ANALYTICS_API_KEY` | Bearer token required by Android ingest requests |
+| `ANALYTICS_API_KEY` | Bearer token required by Android ingest / public notification requests |
+| `ADMIN_USERNAME` | Shared admin login username |
+| `ADMIN_PASSWORD` | Shared admin login password |
+| `AUTH_SECRET` | Secret used to sign the admin session cookie |
 
-In development, if `ANALYTICS_API_KEY` is unset, auth is skipped. Set it before deploying.
+In development, if `ANALYTICS_API_KEY` is unset, API-key auth is skipped. Set it before deploying.
+
+## Admin app
+
+1. Sign in at `/login`
+2. Hub at `/hub` — choose **Notification** or **Calculator Analytics**
+3. `/notifications` — edit Safety Days content, **Save**, then **Notify**
+4. `/analytics` — existing usage dashboard
+
+### Mobile notification API
+
+```
+GET /api/notifications/safety-days/public
+Authorization: Bearer <ANALYTICS_API_KEY>
+```
+
+Returns the published Safety Days payload and a `version` the Android app can poll.
 
 ## API
 
@@ -87,8 +106,9 @@ Database connectivity check (no auth).
 1. Run `npm run db:push` once against your Supabase database (creates tables).
 2. In Vercel → **Settings** → **Environment Variables**, add:
    - `DATABASE_URL` (transaction pooler, port 6543)
-   - `DIRECT_URL` (direct connection, port 5432)
+   - `DIRECT_URL` (direct/session connection, port 5432)
    - `ANALYTICS_API_KEY` (strong secret for the Android app)
+   - `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `AUTH_SECRET`
 3. Redeploy the project.
 4. Verify: `https://<your-app>.vercel.app/api/health` should return `"database": "connected"`.
 
