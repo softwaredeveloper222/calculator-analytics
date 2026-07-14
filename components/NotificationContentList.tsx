@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import type { NotificationListItem } from "@/lib/notifications";
 import type { PaginationMeta } from "@/lib/pagination";
 import { AdminToolbarActions } from "@/components/AdminToolbar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
 import { Pagination } from "@/components/Pagination";
 import {
@@ -292,47 +293,15 @@ export function NotificationContentList({
         </>
       )}
 
-      {pendingDeleteId !== null ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="presentation"
-          onClick={() => setPendingDeleteId(null)}
-        >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-content-title"
-            className="w-full max-w-sm rounded-xl border border-(--admin-border) bg-(--admin-panel) p-5 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <p
-              id="delete-content-title"
-              className="text-base font-medium text-(--admin-text)"
-            >
-              Delete this content?
-            </p>
-            <p className="mt-2 text-sm text-(--admin-text-muted)">
-              This removes the page from the CMS. This cannot be undone.
-            </p>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setPendingDeleteId(null)}
-                className={btnSecondarySm + " w-full justify-center"}
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(pendingDeleteId)}
-                className={btnDangerSm + " w-full justify-center"}
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Delete this content?"
+        description="This removes the page from the CMS. This cannot be undone."
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={() => {
+          if (pendingDeleteId !== null) void handleDelete(pendingDeleteId);
+        }}
+      />
     </div>
   );
 }

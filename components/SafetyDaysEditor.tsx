@@ -4,15 +4,14 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { SafetyDaysContent, SafetyDaysImage } from "@/lib/notifications";
 import { SafetyDaysPreview } from "@/components/SafetyDaysPreview";
 import { FixedPreviewAnchor } from "@/components/FixedPreviewAnchor";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AdminToolbarActions } from "@/components/AdminToolbar";
 import { PlusIcon, SaveIcon, SendIcon, TrashIcon } from "@/components/icons";
 import {
-  btnDangerBlock,
   btnDangerSm,
   btnPrimary,
   btnPrimaryBlock,
   btnPrimarySm,
-  btnSecondaryBlock,
 } from "@/lib/button-styles";
 
 type SafetyDaysEditorProps = {
@@ -559,52 +558,20 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
         </div>
       </form>
 
-      {pendingRemoveIndex !== null ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="presentation"
-          onClick={() => setPendingRemoveIndex(null)}
-        >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="remove-image-title"
-            aria-describedby="remove-image-desc"
-            className="w-full max-w-sm rounded-xl border border-(--admin-border) bg-(--admin-panel) p-5 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <p
-              id="remove-image-title"
-              className="text-base font-medium text-(--admin-text)"
-            >
-              Remove this image?
-            </p>
-            <p
-              id="remove-image-desc"
-              className="mt-2 text-sm text-(--admin-text-muted)"
-            >
-              Image {(pendingRemoveIndex ?? 0) + 1} will be removed from the
-              gallery. This stays unsaved until you click Save.
-            </p>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setPendingRemoveIndex(null)}
-                className={btnSecondaryBlock}
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={() => removeImage(pendingRemoveIndex)}
-                className={btnDangerBlock}
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmDialog
+        open={pendingRemoveIndex !== null}
+        title="Remove this image?"
+        description={
+          <>
+            Image {(pendingRemoveIndex ?? 0) + 1} will be removed from the
+            gallery. This stays unsaved until you click Save.
+          </>
+        }
+        onCancel={() => setPendingRemoveIndex(null)}
+        onConfirm={() => {
+          if (pendingRemoveIndex !== null) removeImage(pendingRemoveIndex);
+        }}
+      />
 
       <FixedPreviewAnchor>
         <SafetyDaysPreview
