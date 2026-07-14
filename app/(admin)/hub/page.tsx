@@ -22,7 +22,8 @@ export default function HubPage() {
             Notification
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-(--admin-text-muted)">
-            Edit content and notify the mobile app when updates are ready.
+            Edit content and send a push notification to the mobile app when
+            updates are ready.
           </p>
           <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-(--admin-accent-text) transition group-hover:gap-2.5">
             <ArrowRightIcon className="h-4 w-4" />

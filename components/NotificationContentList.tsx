@@ -163,7 +163,7 @@ export function NotificationContentList({
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        setError(data?.error ?? "Failed to notify");
+        setError(data?.error ?? "Failed to send push notification");
         return;
       }
       // Notify bumps updatedAt — jump to page 1 so it appears first.
@@ -287,7 +287,7 @@ export function NotificationContentList({
                       className={btnPrimarySm}
                     >
                       <SendIcon className="h-3.5 w-3.5 shrink-0" />
-                      {rowBusy ? "Working…" : "Notify"}
+                      {rowBusy ? "Working…" : "Push Notification"}
                     </button>
                     <button
                       type="button"

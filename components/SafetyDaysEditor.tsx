@@ -217,7 +217,9 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       setImages(nextImages);
       setHeroImageUrl(nextHeroImageUrl);
       rememberBaseline(nextImages, nextHeroImageUrl);
-      setStatus("Draft saved. Click Notify to push this version to the app.");
+      setStatus(
+        "Draft saved. Click Push Notification to push this version to the app.",
+      );
     } catch {
       setError("Unable to reach the server");
     } finally {
@@ -241,7 +243,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       );
       const saved = await saveResponse.json().catch(() => null);
       if (!saveResponse.ok) {
-        setError(saved?.error ?? "Failed to save before notify");
+        setError(saved?.error ?? "Failed to save before push notification");
         return;
       }
 
@@ -251,7 +253,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       );
       const notified = await notifyResponse.json().catch(() => null);
       if (!notifyResponse.ok) {
-        setError(notified?.error ?? "Failed to notify");
+        setError(notified?.error ?? "Failed to send push notification");
         return;
       }
 

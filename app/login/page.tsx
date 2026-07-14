@@ -35,7 +35,7 @@ export default async function LoginPage() {
           <ul className="mt-12 hidden gap-8 text-sm text-(--admin-text-muted) lg:flex">
             <li className="max-w-[11rem]">
               <span className="block font-medium text-(--admin-text-secondary)">
-                Notify
+                Push Notification
               </span>
               Publish Content updates to mobile
             </li>
