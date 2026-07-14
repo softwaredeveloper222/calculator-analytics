@@ -57,6 +57,7 @@ export async function sendSafetyDaysPush(input: {
     const body = (await response.json().catch(() => null)) as {
       id?: string;
       errors?: unknown;
+      recipients?: number;
     } | null;
 
     if (!response.ok) {
@@ -70,6 +71,31 @@ export async function sendSafetyDaysPush(input: {
       return {
         sent: false,
         error: `OneSignal push failed: ${detail}`,
+      };
+    }
+
+    const errorList = Array.isArray(body?.errors)
+      ? body.errors.filter((item): item is string => typeof item === "string")
+      : [];
+    const noSubscribers =
+      errorList.some((msg) =>
+        /not subscribed|No subscribed/i.test(msg),
+      ) || body?.recipients === 0;
+
+    if (noSubscribers) {
+      return {
+        sent: false,
+        onesignalId: body?.id ?? null,
+        warning:
+          "OneSignal accepted the push, but no subscribed devices received it. Open the Android app, allow notifications, and confirm the device appears under OneSignal → Audience.",
+      };
+    }
+
+    if (errorList.length > 0) {
+      return {
+        sent: false,
+        onesignalId: body?.id ?? null,
+        error: `OneSignal push issue: ${errorList.join("; ")}`,
       };
     }
 
