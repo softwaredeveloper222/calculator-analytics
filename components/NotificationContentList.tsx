@@ -102,7 +102,7 @@ export function NotificationContentList({
       const response = await fetch("/api/notifications/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "Untitled notification", bullets: [] }),
+        body: JSON.stringify({}),
       });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.id) {

@@ -51,14 +51,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const page = await createNotificationPage({
-      ...parsed.data,
-      title: parsed.data.title?.trim() || "Untitled notification",
-      bullets: parsed.data.bullets ?? [],
-      registerUrl: parsed.data.registerUrl || null,
-      hotelsUrl: parsed.data.hotelsUrl || null,
-      heroImageUrl: parsed.data.heroImageUrl || null,
-    });
+    const page = await createNotificationPage(parsed.data);
     return NextResponse.json(page, { status: 201 });
   } catch (error) {
     console.error("Failed to create notification page:", error);
