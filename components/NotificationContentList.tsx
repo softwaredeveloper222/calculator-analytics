@@ -57,6 +57,7 @@ export function NotificationContentList({
   const [pagination, setPagination] = useState(initialData.pagination);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,9 +91,13 @@ export function NotificationContentList({
   );
 
   const handleCreate = useCallback(async () => {
+    if (creating || leaving) return;
+
     setCreating(true);
     setError(null);
     setStatus(null);
+    beginProgress?.();
+
     try {
       const response = await fetch("/api/notifications/pages", {
         method: "POST",
@@ -100,18 +105,28 @@ export function NotificationContentList({
         body: JSON.stringify({ title: "Untitled notification", bullets: [] }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) {
+      if (!response.ok || !data?.id) {
+        endProgress?.();
         setError(data?.error ?? "Failed to create content");
+        setCreating(false);
         return;
       }
-      router.push(`/notifications/${data.id}`);
-      router.refresh();
+
+      const href = `/notifications/${data.id}`;
+      setLeaving(true);
+      navigation?.startNavigation();
+      router.prefetch(href);
+
+      // Brief exit beat so the editor rise feels continuous.
+      await new Promise((resolve) => window.setTimeout(resolve, 220));
+      router.push(href);
     } catch {
+      endProgress?.();
+      setLeaving(false);
       setError("Unable to reach the server");
-    } finally {
       setCreating(false);
     }
-  }, [router]);
+  }, [router, creating, leaving, beginProgress, endProgress, navigation]);
 
   const handleDelete = async (id: string) => {
     setBusyId(id);
@@ -163,21 +178,21 @@ export function NotificationContentList({
     }
   };
 
-  const busy = loading || creating || busyId !== null;
+  const busy = loading || creating || leaving || busyId !== null;
   const total = pagination.totalEvents;
   const empty = total === 0 && pages.length === 0 && !loading;
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${leaving ? "page-exit" : ""}`}>
       <AdminToolbarActions>
         <button
           type="button"
-          onClick={handleCreate}
-          disabled={creating}
+          onClick={() => void handleCreate()}
+          disabled={creating || leaving}
           className={btnPrimary}
         >
           <PlusIcon className="h-4 w-4 shrink-0" />
-          {creating ? "Creating…" : "Create content"}
+          {creating || leaving ? "Creating…" : "Create content"}
         </button>
       </AdminToolbarActions>
 
