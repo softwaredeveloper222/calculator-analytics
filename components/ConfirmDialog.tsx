@@ -2,7 +2,11 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { btnDangerBlock, btnSecondaryBlock } from "@/lib/button-styles";
+import {
+  btnDangerBlock,
+  btnPrimaryBlock,
+  btnSecondaryBlock,
+} from "@/lib/button-styles";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -12,6 +16,11 @@ type ConfirmDialogProps = {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** When set, shows a third Discard action (Save / Discard / Keep editing). */
+  discardLabel?: string;
+  onDiscard?: () => void;
+  /** Default confirms are destructive (rose). Use primary for Save. */
+  confirmVariant?: "danger" | "primary";
 };
 
 /**
@@ -26,6 +35,9 @@ export function ConfirmDialog({
   cancelLabel = "No",
   onConfirm,
   onCancel,
+  discardLabel = "Discard",
+  onDiscard,
+  confirmVariant = "danger",
 }: ConfirmDialogProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -44,6 +56,9 @@ export function ConfirmDialog({
 
   if (!open || !mounted) return null;
 
+  const confirmClass =
+    confirmVariant === "primary" ? btnPrimaryBlock : btnDangerBlock;
+
   return createPortal(
     <div
       className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 p-4"
@@ -55,7 +70,11 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-desc"
-        className="w-full max-w-sm rounded-xl border border-(--admin-border) bg-(--admin-panel) p-5 shadow-2xl"
+        className={
+          onDiscard
+            ? "w-full max-w-md rounded-xl border border-(--admin-border) bg-(--admin-panel) p-5 shadow-2xl"
+            : "w-full max-w-sm rounded-xl border border-(--admin-border) bg-(--admin-panel) p-5 shadow-2xl"
+        }
         onClick={(event) => event.stopPropagation()}
       >
         <p
@@ -70,22 +89,48 @@ export function ConfirmDialog({
         >
           {description}
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className={`${btnSecondaryBlock} w-full justify-center`}
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`${btnDangerBlock} w-full justify-center`}
-          >
-            {confirmLabel}
-          </button>
-        </div>
+        {onDiscard ? (
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`${btnSecondaryBlock} w-full justify-center`}
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onDiscard}
+              className={`${btnDangerBlock} w-full justify-center`}
+            >
+              {discardLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className={`${confirmClass} w-full justify-center`}
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`${btnSecondaryBlock} w-full justify-center`}
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className={`${confirmClass} w-full justify-center`}
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.body,

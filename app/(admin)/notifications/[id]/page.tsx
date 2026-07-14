@@ -2,8 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SafetyDaysEditor } from "@/components/SafetyDaysEditor";
 import { SuspendedSection } from "@/components/SuspendedSection";
-import { ArrowLeftIcon } from "@/components/icons";
-import { btnSecondarySm } from "@/lib/button-styles";
 import { getNotificationPage } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +15,6 @@ export default async function NotificationEditPage({ params }: PageProps) {
 
   return (
     <div>
-      <div className="mb-4">
-        <Link href="/notifications" className={btnSecondarySm}>
-          <ArrowLeftIcon className="h-3.5 w-3.5 shrink-0" />
-          Back to content list
-        </Link>
-      </div>
       <SuspendedSection fallbackLabel="Loading editor…">
         <NotificationEditorBody id={id} />
       </SuspendedSection>
@@ -43,6 +35,12 @@ async function NotificationEditorBody({ id }: { id: string }) {
         <p className="mt-2 text-(--admin-text-muted)">
           Check the database connection and try again.
         </p>
+        <Link
+          href="/notifications"
+          className="mt-4 inline-block text-sm text-(--admin-accent-text) underline"
+        >
+          Back to content list
+        </Link>
       </section>
     );
   }

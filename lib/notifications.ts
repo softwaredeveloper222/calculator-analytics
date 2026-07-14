@@ -227,6 +227,32 @@ export function getSafetyDaysTemplate(): SafetyDaysInput {
   };
 }
 
+/** Unsaved editor seed for Create — not written to the DB until Save. */
+export function getSafetyDaysTemplateContent(): SafetyDaysContent {
+  const template = getSafetyDaysTemplate();
+  const now = new Date().toISOString();
+  return {
+    id: "",
+    title: template.title,
+    subtitle: template.subtitle ?? null,
+    eventName: template.eventName ?? null,
+    dateLabel: template.dateLabel ?? null,
+    location: template.location ?? null,
+    priceAttendee: template.priceAttendee ?? null,
+    priceExhibitor: template.priceExhibitor ?? null,
+    bullets: template.bullets,
+    registerUrl: template.registerUrl ?? null,
+    hotelsUrl: template.hotelsUrl ?? null,
+    bodyHtml: template.bodyHtml ?? null,
+    heroImageUrl: template.heroImageUrl ?? null,
+    images: template.images ?? [],
+    version: 0,
+    publishedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 function parseBullets(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw) as unknown;

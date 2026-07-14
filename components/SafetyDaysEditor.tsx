@@ -1,21 +1,32 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SafetyDaysContent, SafetyDaysImage } from "@/lib/notifications";
 import { SafetyDaysPreview } from "@/components/SafetyDaysPreview";
 import { FixedPreviewAnchor } from "@/components/FixedPreviewAnchor";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AdminToolbarActions } from "@/components/AdminToolbar";
-import { PlusIcon, SaveIcon, SendIcon, TrashIcon } from "@/components/icons";
+import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
+import {
+  ArrowLeftIcon,
+  PlusIcon,
+  SaveIcon,
+  SendIcon,
+  TrashIcon,
+} from "@/components/icons";
 import {
   btnDangerSm,
   btnPrimary,
   btnPrimaryBlock,
   btnPrimarySm,
+  btnSecondarySm,
 } from "@/lib/button-styles";
 
 type SafetyDaysEditorProps = {
   initialData: SafetyDaysContent;
+  /** Create flow: template is only persisted when the user saves. */
+  isNew?: boolean;
 };
 
 type LocalImage = SafetyDaysImage & { clientId: string };
@@ -66,7 +77,13 @@ function buildBaseline(fields: Omit<EditorBaseline, "images">, images: LocalImag
   };
 }
 
-export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
+export function SafetyDaysEditor({
+  initialData,
+  isNew = false,
+}: SafetyDaysEditorProps) {
+  const router = useRouter();
+  const navigation = useNavigationLoading();
+  const [pageId, setPageId] = useState(initialData.id || "");
   const [title, setTitle] = useState(initialData.title);
   const [subtitle, setSubtitle] = useState(initialData.subtitle ?? "");
   const [eventName, setEventName] = useState(initialData.eventName ?? "");
@@ -120,10 +137,12 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(
     null,
   );
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [removingClientId, setRemovingClientId] = useState<string | null>(null);
   const lastImageRef = useRef<HTMLDivElement | null>(null);
   const shouldScrollToLastImage = useRef(false);
   const removeTimeoutRef = useRef<number | null>(null);
+  const allowLeaveRef = useRef(false);
 
   const bullets = useMemo(
     () =>
@@ -149,6 +168,72 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
     const saved = baselineImagesById.get(image.clientId);
     if (!saved) return true;
     return saved.url !== image.url || saved.alt !== (image.alt ?? "");
+  };
+
+  const hasUnsavedChanges = useMemo(() => {
+    const fields: Array<keyof Omit<EditorBaseline, "images">> = [
+      "title",
+      "subtitle",
+      "eventName",
+      "dateLabel",
+      "location",
+      "priceAttendee",
+      "priceExhibitor",
+      "bulletsText",
+      "registerUrl",
+      "hotelsUrl",
+      "heroImageUrl",
+    ];
+    const current: Record<string, string> = {
+      title,
+      subtitle,
+      eventName,
+      dateLabel,
+      location,
+      priceAttendee,
+      priceExhibitor,
+      bulletsText,
+      registerUrl,
+      hotelsUrl,
+      heroImageUrl,
+    };
+    if (fields.some((key) => current[key] !== baseline[key])) return true;
+    if (images.length !== baseline.images.length) return true;
+    return images.some((image) => isImageDirty(image));
+  }, [
+    baseline,
+    baselineImagesById,
+    title,
+    subtitle,
+    eventName,
+    dateLabel,
+    location,
+    priceAttendee,
+    priceExhibitor,
+    bulletsText,
+    registerUrl,
+    hotelsUrl,
+    heroImageUrl,
+    images,
+  ]);
+
+  const isNewDraft = isNew && !pageId;
+
+  const shouldConfirmLeave = isNewDraft || hasUnsavedChanges;
+
+  const navigateToList = () => {
+    allowLeaveRef.current = true;
+    setLeaveDialogOpen(false);
+    navigation?.startNavigation();
+    router.push("/notifications");
+  };
+
+  const requestLeave = () => {
+    if (!shouldConfirmLeave) {
+      navigateToList();
+      return;
+    }
+    setLeaveDialogOpen(true);
   };
 
   const rememberBaseline = (nextImages: LocalImage[], nextHeroImageUrl: string) => {
@@ -190,27 +275,36 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       .map(({ url, alt }) => ({ url, alt: alt || undefined })),
   };
 
-  const handleSave = async (event: FormEvent) => {
-    event.preventDefault();
+  const saveDraft = async (): Promise<string | null> => {
     setError(null);
     setStatus(null);
     setIsSaving(true);
 
     try {
-      const response = await fetch(`/api/notifications/pages/${initialData.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const isCreate = !pageId;
+      const response = await fetch(
+        isCreate
+          ? "/api/notifications/pages"
+          : `/api/notifications/pages/${pageId}`,
+        {
+          method: isCreate ? "POST" : "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       const data = await response.json().catch(() => null);
-      if (!response.ok) {
+      if (!response.ok || !data?.id) {
         setError(data?.error ?? "Failed to save");
-        return;
+        return null;
       }
 
       const nextImages = toLocalImages(data.images ?? []);
       const nextHeroImageUrl = data.heroImageUrl ?? "";
+      setPageId(data.id);
+      if (isCreate || data.id !== pageId) {
+        window.history.replaceState(null, "", `/notifications/${data.id}`);
+      }
       setVersion(data.version);
       setPublishedAt(data.publishedAt);
       setUpdatedAt(data.updatedAt);
@@ -220,11 +314,36 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       setStatus(
         "Draft saved. Click Push Notification to push this version to the app.",
       );
+      return data.id as string;
     } catch {
       setError("Unable to reach the server");
+      return null;
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSave = async (event: FormEvent) => {
+    event.preventDefault();
+    await saveDraft();
+  };
+
+  useEffect(() => {
+    if (!shouldConfirmLeave) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowLeaveRef.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [shouldConfirmLeave]);
+
+  const handleLeaveSave = async () => {
+    if (isSaving) return;
+    const savedId = await saveDraft();
+    if (savedId) navigateToList();
+    else setLeaveDialogOpen(false);
   };
 
   const handleNotify = async () => {
@@ -233,22 +352,11 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
     setIsNotifying(true);
 
     try {
-      const saveResponse = await fetch(
-        `/api/notifications/pages/${initialData.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
-      const saved = await saveResponse.json().catch(() => null);
-      if (!saveResponse.ok) {
-        setError(saved?.error ?? "Failed to save before push notification");
-        return;
-      }
+      const savedId = await saveDraft();
+      if (!savedId) return;
 
       const notifyResponse = await fetch(
-        `/api/notifications/pages/${initialData.id}/notify`,
+        `/api/notifications/pages/${savedId}/notify`,
         { method: "POST" },
       );
       const notified = await notifyResponse.json().catch(() => null);
@@ -259,6 +367,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
 
       const nextImages = toLocalImages(notified.page.images ?? []);
       const nextHeroImageUrl = notified.page.heroImageUrl ?? "";
+      setPageId(notified.page.id);
       setVersion(notified.page.version);
       setPublishedAt(notified.page.publishedAt);
       setUpdatedAt(notified.page.updatedAt);
@@ -348,7 +457,19 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   }, [images.length]);
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+    <div>
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={requestLeave}
+          className={btnSecondarySm}
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5 shrink-0" />
+          Back to content list
+        </button>
+      </div>
+
+      <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
       <AdminToolbarActions>
         <button
           type="submit"
@@ -563,21 +684,6 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
         </div>
       </form>
 
-      <ConfirmDialog
-        open={pendingRemoveIndex !== null}
-        title="Remove this image?"
-        description={
-          <>
-            Image {(pendingRemoveIndex ?? 0) + 1} will be removed from the
-            gallery. This stays unsaved until you click Save.
-          </>
-        }
-        onCancel={() => setPendingRemoveIndex(null)}
-        onConfirm={() => {
-          if (pendingRemoveIndex !== null) removeImage(pendingRemoveIndex);
-        }}
-      />
-
       <FixedPreviewAnchor>
         <SafetyDaysPreview
           title={title}
@@ -595,6 +701,45 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
           images={images}
         />
       </FixedPreviewAnchor>
+      </div>
+
+      <ConfirmDialog
+        open={pendingRemoveIndex !== null}
+        title="Remove this image?"
+        description={
+          <>
+            Image {(pendingRemoveIndex ?? 0) + 1} will be removed from the
+            gallery. This stays unsaved until you click Save.
+          </>
+        }
+        onCancel={() => setPendingRemoveIndex(null)}
+        onConfirm={() => {
+          if (pendingRemoveIndex !== null) removeImage(pendingRemoveIndex);
+        }}
+      />
+
+      <ConfirmDialog
+        open={leaveDialogOpen}
+        title={isNewDraft ? "Leave without saving?" : "Unsaved changes"}
+        description={
+          isNewDraft
+            ? "This new content is not saved yet. Save it to keep it in the list, or discard to leave without creating it."
+            : "Save your edits before leaving, or discard them."
+        }
+        confirmLabel={isSaving ? "Saving…" : "Save"}
+        cancelLabel="Keep editing"
+        discardLabel="Discard"
+        confirmVariant="primary"
+        onCancel={() => {
+          if (!isSaving) setLeaveDialogOpen(false);
+        }}
+        onDiscard={() => {
+          if (!isSaving) navigateToList();
+        }}
+        onConfirm={() => {
+          void handleLeaveSave();
+        }}
+      />
     </div>
   );
 }

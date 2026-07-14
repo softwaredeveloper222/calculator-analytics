@@ -90,43 +90,22 @@ export function NotificationContentList({
     [applyListData, beginProgress, endProgress],
   );
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     if (creating || leaving) return;
 
     setCreating(true);
+    setLeaving(true);
     setError(null);
     setStatus(null);
     beginProgress?.();
+    navigation?.startNavigation();
 
-    try {
-      const response = await fetch("/api/notifications/pages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.id) {
-        endProgress?.();
-        setError(data?.error ?? "Failed to create content");
-        setCreating(false);
-        return;
-      }
-
-      const href = `/notifications/${data.id}`;
-      setLeaving(true);
-      navigation?.startNavigation();
-      router.prefetch(href);
-
-      // Brief exit beat so the editor rise feels continuous.
-      await new Promise((resolve) => window.setTimeout(resolve, 220));
+    const href = "/notifications/new";
+    router.prefetch(href);
+    window.setTimeout(() => {
       router.push(href);
-    } catch {
-      endProgress?.();
-      setLeaving(false);
-      setError("Unable to reach the server");
-      setCreating(false);
-    }
-  }, [router, creating, leaving, beginProgress, endProgress, navigation]);
+    }, 220);
+  }, [router, creating, leaving, beginProgress, navigation]);
 
   const handleDelete = async (id: string) => {
     setBusyId(id);
@@ -192,7 +171,7 @@ export function NotificationContentList({
       <AdminToolbarActions>
         <button
           type="button"
-          onClick={() => void handleCreate()}
+          onClick={handleCreate}
           disabled={creating || leaving}
           className={btnPrimary}
         >
