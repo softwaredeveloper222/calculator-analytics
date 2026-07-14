@@ -67,9 +67,7 @@ export function SafetyDaysPreview({
         Mobile preview
       </p>
 
-      <div
-        className="relative mx-auto flex h-[calc(100vh-8.5rem)] h-[calc(100dvh-8.5rem)] max-h-[calc(100vh-8.5rem)] max-h-[calc(100dvh-8.5rem)] flex-col rounded-[2.25rem] border border-slate-800 bg-slate-900 p-3 shadow-[0_24px_60px_rgba(15,23,42,0.35)]"
-      >
+      <div className="relative mx-auto flex h-[var(--preview-frame-height,calc(100dvh-10.25rem))] max-h-[var(--preview-frame-height,calc(100dvh-10.25rem))] flex-col rounded-[2.25rem] border border-slate-800 bg-slate-900 p-3 shadow-[0_24px_60px_rgba(15,23,42,0.35)]">
         {/* Side buttons */}
         <div
           aria-hidden

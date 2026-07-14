@@ -1,226 +1,227 @@
 @import "tailwindcss";
-
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* Light (default) */
+
 :root {
-  --background: #d9e4f5;
-  --foreground: #0f172a;
-  --admin-bg: #d9e4f5;
-  --admin-sidebar: rgba(245, 248, 253, 0.72);
-  --admin-panel: rgba(255, 255, 255, 0.78);
-  --admin-panel-elevated: rgba(255, 255, 255, 0.9);
-  --admin-border: rgba(148, 173, 214, 0.45);
-  --admin-border-strong: rgba(100, 140, 200, 0.55);
-  --admin-accent: #2563eb;
-  --admin-accent-soft: rgba(37, 99, 235, 0.14);
-  --admin-accent-text: #1d4ed8;
-  --admin-muted: #64748b;
-  --admin-text: #0f172a;
-  --admin-text-secondary: #475569;
-  --admin-text-muted: #64748b;
-  --admin-inset: rgba(228, 235, 247, 0.85);
-  --admin-menubar: rgba(245, 248, 253, 0.7);
-  --admin-overlay: rgba(15, 23, 42, 0.35);
-  --admin-input-bg: rgba(255, 255, 255, 0.88);
-  --admin-btn-secondary-hover: rgba(37, 99, 235, 0.08);
-  --login-panel-bg: rgba(255, 255, 255, 0.72);
-  --login-panel-border: rgba(37, 99, 235, 0.16);
-  --atmosphere-1: rgba(59, 130, 246, 0.45);
-  --atmosphere-2: rgba(14, 165, 233, 0.32);
-  --atmosphere-3: rgba(99, 140, 220, 0.22);
-  --login-grid: rgba(59, 99, 170, 0.14);
-  --shadow-panel: 0 20px 50px rgba(37, 70, 140, 0.12);
+    --background: #d9e4f5;
+    --foreground: #0f172a;
+    --admin-bg: #d9e4f5;
+    --admin-sidebar: rgba(245, 248, 253, 0.72);
+    --admin-panel: rgba(255, 255, 255, 0.78);
+    --admin-panel-elevated: rgba(255, 255, 255, 0.9);
+    --admin-border: rgba(148, 173, 214, 0.45);
+    --admin-border-strong: rgba(100, 140, 200, 0.55);
+    --admin-accent: #2563eb;
+    --admin-accent-soft: rgba(37, 99, 235, 0.14);
+    --admin-accent-text: #1d4ed8;
+    --admin-muted: #64748b;
+    --admin-text: #0f172a;
+    --admin-text-secondary: #475569;
+    --admin-text-muted: #64748b;
+    --admin-inset: rgba(228, 235, 247, 0.85);
+    --admin-menubar: rgba(245, 248, 253, 0.7);
+    --admin-overlay: rgba(15, 23, 42, 0.35);
+    --admin-input-bg: rgba(255, 255, 255, 0.88);
+    --admin-btn-secondary-hover: rgba(37, 99, 235, 0.08);
+    --login-panel-bg: rgba(255, 255, 255, 0.72);
+    --login-panel-border: rgba(37, 99, 235, 0.16);
+    --atmosphere-1: rgba(59, 130, 246, 0.45);
+    --atmosphere-2: rgba(14, 165, 233, 0.32);
+    --atmosphere-3: rgba(99, 140, 220, 0.22);
+    --login-grid: rgba(59, 99, 170, 0.14);
+    --shadow-panel: 0 20px 50px rgba(37, 70, 140, 0.12);
 }
 
+
 /* Dark */
+
 :root[data-theme="dark"] {
-  --background: #060b18;
-  --foreground: #e8eef9;
-  --admin-bg: #060b18;
-  --admin-sidebar: rgba(10, 16, 32, 0.72);
-  --admin-panel: rgba(15, 22, 40, 0.72);
-  --admin-panel-elevated: rgba(20, 28, 48, 0.85);
-  --admin-border: rgba(80, 110, 170, 0.28);
-  --admin-border-strong: rgba(110, 140, 200, 0.4);
-  --admin-accent: #6d8cff;
-  --admin-accent-soft: rgba(109, 140, 255, 0.16);
-  --admin-accent-text: #93b0ff;
-  --admin-muted: #8b97b0;
-  --admin-text: #e8eef9;
-  --admin-text-secondary: #b6c0d4;
-  --admin-text-muted: #8b97b0;
-  --admin-inset: rgba(8, 14, 28, 0.8);
-  --admin-menubar: rgba(10, 16, 32, 0.7);
-  --admin-overlay: rgba(0, 0, 0, 0.55);
-  --admin-input-bg: rgba(8, 14, 28, 0.75);
-  --admin-btn-secondary-hover: rgba(109, 140, 255, 0.1);
-  --login-panel-bg: rgba(12, 18, 36, 0.7);
-  --login-panel-border: rgba(109, 140, 255, 0.22);
-  --atmosphere-1: rgba(59, 110, 255, 0.38);
-  --atmosphere-2: rgba(14, 165, 200, 0.28);
-  --atmosphere-3: rgba(80, 120, 220, 0.2);
-  --login-grid: rgba(120, 150, 210, 0.1);
-  --shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.45);
+    --background: #060b18;
+    --foreground: #e8eef9;
+    --admin-bg: #060b18;
+    --admin-sidebar: rgba(10, 16, 32, 0.72);
+    --admin-panel: rgba(15, 22, 40, 0.72);
+    --admin-panel-elevated: rgba(20, 28, 48, 0.85);
+    --admin-border: rgba(80, 110, 170, 0.28);
+    --admin-border-strong: rgba(110, 140, 200, 0.4);
+    --admin-accent: #6d8cff;
+    --admin-accent-soft: rgba(109, 140, 255, 0.16);
+    --admin-accent-text: #93b0ff;
+    --admin-muted: #8b97b0;
+    --admin-text: #e8eef9;
+    --admin-text-secondary: #b6c0d4;
+    --admin-text-muted: #8b97b0;
+    --admin-inset: rgba(8, 14, 28, 0.8);
+    --admin-menubar: rgba(10, 16, 32, 0.7);
+    --admin-overlay: rgba(0, 0, 0, 0.55);
+    --admin-input-bg: rgba(8, 14, 28, 0.75);
+    --admin-btn-secondary-hover: rgba(109, 140, 255, 0.1);
+    --login-panel-bg: rgba(12, 18, 36, 0.7);
+    --login-panel-border: rgba(109, 140, 255, 0.22);
+    --atmosphere-1: rgba(59, 110, 255, 0.38);
+    --atmosphere-2: rgba(14, 165, 200, 0.28);
+    --atmosphere-3: rgba(80, 120, 220, 0.2);
+    --login-grid: rgba(120, 150, 210, 0.1);
+    --shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-admin-bg: var(--admin-bg);
-  --color-admin-sidebar: var(--admin-sidebar);
-  --color-admin-panel: var(--admin-panel);
-  --color-admin-panel-elevated: var(--admin-panel-elevated);
-  --color-admin-border: var(--admin-border);
-  --color-admin-border-strong: var(--admin-border-strong);
-  --color-admin-accent: var(--admin-accent);
-  --color-admin-accent-soft: var(--admin-accent-soft);
-  --color-admin-accent-text: var(--admin-accent-text);
-  --color-admin-muted: var(--admin-muted);
-  --color-admin-text: var(--admin-text);
-  --color-admin-text-secondary: var(--admin-text-secondary);
-  --color-admin-text-muted: var(--admin-text-muted);
-  --color-admin-inset: var(--admin-inset);
-  --color-admin-menubar: var(--admin-menubar);
-  --color-admin-overlay: var(--admin-overlay);
-  --color-admin-input-bg: var(--admin-input-bg);
-  --color-admin-btn-secondary-hover: var(--admin-btn-secondary-hover);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-admin-bg: var(--admin-bg);
+    --color-admin-sidebar: var(--admin-sidebar);
+    --color-admin-panel: var(--admin-panel);
+    --color-admin-panel-elevated: var(--admin-panel-elevated);
+    --color-admin-border: var(--admin-border);
+    --color-admin-border-strong: var(--admin-border-strong);
+    --color-admin-accent: var(--admin-accent);
+    --color-admin-accent-soft: var(--admin-accent-soft);
+    --color-admin-accent-text: var(--admin-accent-text);
+    --color-admin-muted: var(--admin-muted);
+    --color-admin-text: var(--admin-text);
+    --color-admin-text-secondary: var(--admin-text-secondary);
+    --color-admin-text-muted: var(--admin-text-muted);
+    --color-admin-inset: var(--admin-inset);
+    --color-admin-menubar: var(--admin-menubar);
+    --color-admin-overlay: var(--admin-overlay);
+    --color-admin-input-bg: var(--admin-input-bg);
+    --color-admin-btn-secondary-hover: var(--admin-btn-secondary-hover);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @keyframes login-rise {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 @keyframes login-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes nav-progress {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
+    0% {
+        transform: translateX(-120%);
+    }
+    100% {
+        transform: translateX(400%);
+    }
 }
 
 .nav-progress-bar {
-  animation: nav-progress 1s ease-in-out infinite;
+    animation: nav-progress 1s ease-in-out infinite;
 }
 
-.page-transition {
-  animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Shared blue blur atmosphere (login + admin) */
-.app-atmosphere {
-  position: relative;
-  isolation: isolate;
-  background: var(--admin-bg);
-}
-
-.app-atmosphere::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 5% 0%, var(--atmosphere-1), transparent 55%),
-    radial-gradient(ellipse 70% 55% at 100% 100%, var(--atmosphere-2), transparent 50%),
-    radial-gradient(ellipse 55% 45% at 50% 40%, var(--atmosphere-3), transparent 60%),
-    var(--admin-bg);
-}
-
-.app-atmosphere::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  backdrop-filter: blur(48px);
-  -webkit-backdrop-filter: blur(48px);
-}
-
-.app-grid {
-  background-image:
-    linear-gradient(var(--login-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--login-grid) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
-}
-
-.glass-panel {
-  background: var(--admin-panel);
-  border: 1px solid var(--admin-border);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-panel);
-}
-
-.glass-sidebar {
-  background: var(--admin-sidebar);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.glass-menubar {
-  background: var(--admin-menubar);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.login-panel-enter {
-  animation: login-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* Same rise as login panel — used for all admin page navigations */
+.page-transition,
+.login-panel-enter,
+.post-login-enter {
+    animation: login-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .login-brand-enter {
-  animation: login-fade 0.7s ease both;
+    animation: login-fade 0.7s ease both;
+}
+
+@keyframes login-form-exit {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.login-form-exit {
+    pointer-events: none;
+    animation: login-form-exit 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+
+/* Shared blue blur atmosphere (login + admin) */
+
+.app-atmosphere {
+    position: relative;
+    isolation: isolate;
+    background: var(--admin-bg);
+}
+
+.app-atmosphere::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 60% at 5% 0%, var(--atmosphere-1), transparent 55%), radial-gradient(ellipse 70% 55% at 100% 100%, var(--atmosphere-2), transparent 50%), radial-gradient(ellipse 55% 45% at 50% 40%, var(--atmosphere-3), transparent 60%), var(--admin-bg);
+}
+
+.app-atmosphere::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    backdrop-filter: blur(48px);
+    -webkit-backdrop-filter: blur(48px);
+}
+
+.app-grid {
+    background-image: linear-gradient(var(--login-grid) 1px, transparent 1px), linear-gradient(90deg, var(--login-grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+}
+
+.glass-panel {
+    background: var(--admin-panel);
+    border: 1px solid var(--admin-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: var(--shadow-panel);
+}
+
+.glass-sidebar {
+    background: var(--admin-sidebar);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-menubar {
+    background: var(--admin-menubar);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-transition,
-  .login-panel-enter,
-  .login-brand-enter {
-    animation: none;
-  }
-
-  .app-atmosphere::after,
-  .glass-panel,
-  .glass-sidebar,
-  .glass-menubar {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
+    .page-transition,
+    .login-panel-enter,
+    .login-brand-enter,
+    .post-login-enter,
+    .login-form-exit {
+        animation: none !important;
+    }
+    .app-atmosphere::after,
+    .glass-panel,
+    .glass-sidebar,
+    .glass-menubar {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }

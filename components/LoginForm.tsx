@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
+import { markPostLoginEnter } from "@/components/PostLoginEnter";
 import { LoginIcon } from "@/components/icons";
 import { btnPrimaryBlock } from "@/lib/button-styles";
 
@@ -17,6 +18,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -39,18 +41,28 @@ export function LoginForm() {
       }
 
       const next = searchParams.get("next");
+      markPostLoginEnter();
+      setIsLeaving(true);
       navigation?.startNavigation();
+
+      // Brief exit beat so the handoff into admin feels intentional.
+      await new Promise((resolve) => window.setTimeout(resolve, 280));
+
       router.replace(next && next.startsWith("/") ? next : "/hub");
       router.refresh();
     } catch {
       setError("Unable to reach the server");
+      setIsLeaving(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className={`space-y-5 ${isLeaving ? "login-form-exit" : ""}`}
+    >
       <div className="space-y-2">
         <label
           htmlFor="username"

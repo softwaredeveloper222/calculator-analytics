@@ -9,6 +9,8 @@ import {
   AdminToolbarProvider,
   AdminToolbarSlot,
 } from "@/components/AdminToolbar";
+import { PageEnter } from "@/components/PageEnter";
+import { PostLoginEnter } from "@/components/PostLoginEnter";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
 import {
   BellIcon,
@@ -349,7 +351,9 @@ function AdminShellFrame({ children }: { children: ReactNode }) {
         </header>
 
         <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-7 sm:px-6 lg:px-8">
-          {children}
+          <PostLoginEnter>
+            <PageEnter pathname={pathname}>{children}</PageEnter>
+          </PostLoginEnter>
         </main>
       </div>
     </div>
