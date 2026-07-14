@@ -8,8 +8,10 @@ import { btnSecondarySm } from "@/lib/button-styles";
 
 export function LogoutButton({
   className,
+  compact = false,
 }: {
   className?: string;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const navigation = useNavigationLoading();
@@ -33,9 +35,13 @@ export function LogoutButton({
       onClick={handleLogout}
       disabled={isLoggingOut}
       className={className || btnSecondarySm}
+      title="Sign out"
+      aria-label="Sign out"
     >
       <LogoutIcon className="h-4 w-4 shrink-0" />
-      <span>{isLoggingOut ? "Signing out…" : "Sign out"}</span>
+      {!compact ? (
+        <span>{isLoggingOut ? "Signing out…" : "Sign out"}</span>
+      ) : null}
     </button>
   );
 }

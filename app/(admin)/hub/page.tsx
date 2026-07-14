@@ -1,26 +1,17 @@
 import Link from "next/link";
-import { AdminPageHeader } from "@/components/AdminPageHeader";
 import {
   ArrowRightIcon,
   BellIcon,
   ChartIcon,
-  WorkspaceIcon,
 } from "@/components/icons";
 
 export default function HubPage() {
   return (
     <div>
-      <AdminPageHeader
-        eyebrow="Workspace"
-        title="Choose where to work"
-        description="Jump into Content publishing or calculator usage analytics."
-        icon={WorkspaceIcon}
-      />
-
       <section className="grid gap-4 md:grid-cols-2">
         <Link
           href="/notifications"
-          className="glass-panel group relative overflow-hidden rounded-2xl p-6 transition duration-200 hover:-translate-y-0.5 hover:border-(--admin-accent)/40"
+          className="glass-panel group relative overflow-hidden rounded-2xl border border-(--admin-border-strong) p-6 transition duration-200 hover:-translate-y-0.5 hover:border-(--admin-accent)/40"
         >
           <div
             aria-hidden
@@ -41,7 +32,7 @@ export default function HubPage() {
 
         <Link
           href="/analytics"
-          className="glass-panel group relative overflow-hidden rounded-2xl p-6 transition duration-200 hover:-translate-y-0.5 hover:border-(--admin-accent)/40"
+          className="glass-panel group relative overflow-hidden rounded-2xl border border-(--admin-border-strong) p-6 transition duration-200 hover:-translate-y-0.5 hover:border-(--admin-accent)/40"
         >
           <div
             aria-hidden

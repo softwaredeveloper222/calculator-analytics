@@ -1,17 +1,26 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "@/lib/session";
-import { publishSafetyDaysPage } from "@/lib/notifications";
+import { NextRequest, NextResponse } from "next/server";
+import { publishNotificationPage } from "@/lib/notifications";
 import { sendSafetyDaysPush } from "@/lib/onesignal";
+import { getServerSession } from "@/lib/session";
 
-/** @deprecated Prefer POST /api/notifications/pages/[id]/notify */
-export async function POST() {
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+export async function POST(_request: NextRequest, context: RouteContext) {
   const session = await getServerSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await context.params;
+
   try {
-    const page = await publishSafetyDaysPage();
+    const page = await publishNotificationPage(id);
+    if (!page) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     const push = await sendSafetyDaysPush({
       version: page.version,
       title: page.title,
@@ -30,7 +39,7 @@ export async function POST() {
       warning: push.warning ?? push.error ?? undefined,
     });
   } catch (error) {
-    console.error("Failed to publish Safety Days page:", error);
+    console.error("Failed to publish notification page:", error);
     return NextResponse.json(
       { error: "Failed to publish notification" },
       { status: 500 },

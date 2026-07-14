@@ -1,30 +1,21 @@
-import { AdminPageHeader } from "@/components/AdminPageHeader";
+import { NotificationContentList } from "@/components/NotificationContentList";
 import { SuspendedSection } from "@/components/SuspendedSection";
-import { SafetyDaysEditor } from "@/components/SafetyDaysEditor";
-import { BellIcon } from "@/components/icons";
-import { ensureSafetyDaysPage } from "@/lib/notifications";
+import { listNotificationPages } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
 export default function NotificationsPage() {
   return (
-    <div>
-      <AdminPageHeader
-        title="Notification"
-        description="Edit content, save drafts, then notify the mobile app when ready."
-        icon={BellIcon}
-      />
-      <SuspendedSection fallbackLabel="Loading notification…">
-        <NotificationsBody />
-      </SuspendedSection>
-    </div>
+    <SuspendedSection fallbackLabel="Loading content list…">
+      <NotificationsListBody />
+    </SuspendedSection>
   );
 }
 
-async function NotificationsBody() {
+async function NotificationsListBody() {
   try {
-    const page = await ensureSafetyDaysPage();
-    return <SafetyDaysEditor initialData={page} />;
+    const pages = await listNotificationPages();
+    return <NotificationContentList initialPages={pages} />;
   } catch (error) {
     console.error("Failed to load notifications CMS:", error);
     return (

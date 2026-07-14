@@ -1,11 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { AdminPageHeader } from "@/components/AdminPageHeader";
 import { AnalyticsRefreshProvider } from "@/components/AnalyticsRefreshProvider";
+import { AnalyticsToolbar } from "@/components/AnalyticsToolbar";
 import { EventHistoryPanel } from "@/components/EventHistoryPanel";
-import { RefreshButton } from "@/components/RefreshButton";
 import { SuspendedSection } from "@/components/SuspendedSection";
-import { ChartIcon } from "@/components/icons";
 import { getAnalyticsOverview, getEventHistory } from "@/lib/analytics-queries";
 
 export const dynamic = "force-dynamic";
@@ -14,12 +12,7 @@ export default function AnalyticsPage() {
   return (
     <AnalyticsRefreshProvider>
       <div className="space-y-6">
-        <AdminPageHeader
-          title="Analytics"
-          description="Live data from the mobile app. Use pagination below to browse past events."
-          actions={<RefreshButton />}
-          icon={ChartIcon}
-        />
+        <AnalyticsToolbar />
         {/* Stream overview and history independently so one does not block the other. */}
         <SuspendedSection fallbackLabel="Loading overview…">
           <AnalyticsOverview />

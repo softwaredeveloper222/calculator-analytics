@@ -12,6 +12,7 @@ export type SafetyDaysPushResult = {
 export async function sendSafetyDaysPush(input: {
   version: number;
   title?: string | null;
+  contentId?: string | null;
 }): Promise<SafetyDaysPushResult> {
   const appId = process.env.ONESIGNAL_APP_ID?.trim();
   const apiKey = process.env.ONESIGNAL_REST_API_KEY?.trim();
@@ -45,6 +46,7 @@ export async function sendSafetyDaysPush(input: {
         data: {
           type: "safety_days",
           version: String(input.version),
+          ...(input.contentId ? { contentId: input.contentId } : {}),
         },
       }),
     });

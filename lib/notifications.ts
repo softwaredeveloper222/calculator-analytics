@@ -24,7 +24,21 @@ export type SafetyDaysContent = {
   images: SafetyDaysImage[];
   version: number;
   publishedAt: string | null;
+  createdAt: string;
   updatedAt: string;
+};
+
+export type NotificationListItem = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  eventName: string | null;
+  dateLabel: string | null;
+  version: number;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  imageCount: number;
 };
 
 export type SafetyDaysInput = {
@@ -258,6 +272,7 @@ function mapPage(page: {
   images: string;
   version: number;
   publishedAt: Date | null;
+  createdAt?: Date | null;
   updatedAt: Date;
 }): SafetyDaysContent {
   return {
@@ -277,114 +292,209 @@ function mapPage(page: {
     images: parseImages(page.images),
     version: page.version,
     publishedAt: page.publishedAt?.toISOString() ?? null,
+    createdAt: (page.createdAt ?? page.updatedAt).toISOString(),
     updatedAt: page.updatedAt.toISOString(),
   };
 }
 
-export async function ensureSafetyDaysPage() {
-  const existing = await prisma.notificationPage.findUnique({
-    where: { id: SAFETY_DAYS_ID },
-  });
+function mapListItem(page: {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  eventName: string | null;
+  dateLabel: string | null;
+  images: string;
+  version: number;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): NotificationListItem {
+  return {
+    id: page.id,
+    title: page.title,
+    subtitle: page.subtitle,
+    eventName: page.eventName,
+    dateLabel: page.dateLabel,
+    version: page.version,
+    publishedAt: page.publishedAt?.toISOString() ?? null,
+    createdAt: page.createdAt.toISOString(),
+    updatedAt: page.updatedAt.toISOString(),
+    imageCount: parseImages(page.images).length,
+  };
+}
 
-  if (existing) {
-    const images = parseImages(existing.images);
-    // Only seed defaults when the page has never had media configured.
-    // Do not rewrite when the editor has intentionally fewer images.
-    const needsImageBackfill =
-      !existing.heroImageUrl && images.length === 0;
+function inputToData(input: SafetyDaysInput) {
+  return {
+    title: input.title,
+    subtitle: input.subtitle ?? null,
+    eventName: input.eventName ?? null,
+    dateLabel: input.dateLabel ?? null,
+    location: input.location ?? null,
+    priceAttendee: input.priceAttendee ?? null,
+    priceExhibitor: input.priceExhibitor ?? null,
+    bullets: JSON.stringify(input.bullets),
+    registerUrl: input.registerUrl ?? null,
+    hotelsUrl: input.hotelsUrl ?? null,
+    bodyHtml: input.bodyHtml ?? null,
+    heroImageUrl: input.heroImageUrl ?? null,
+    images: JSON.stringify(input.images ?? []),
+  };
+}
 
-    if (needsImageBackfill) {
-      const updated = await prisma.notificationPage.update({
-        where: { id: SAFETY_DAYS_ID },
-        data: {
-          heroImageUrl: DEFAULT_CONTENT.heroImageUrl,
-          images: JSON.stringify(DEFAULT_CONTENT.images),
-          registerUrl:
-            existing.registerUrl?.includes("formsite.com")
-              ? existing.registerUrl
-              : DEFAULT_CONTENT.registerUrl,
-        },
-      });
-      return mapPage(updated);
-    }
+/** Seed the classic Safety Days page once if the CMS is empty. */
+export async function ensureNotificationSeed() {
+  const count = await prisma.notificationPage.count();
+  if (count > 0) return;
 
-    return mapPage(existing);
-  }
-
-  const created = await prisma.notificationPage.create({
+  await prisma.notificationPage.create({
     data: {
       id: SAFETY_DAYS_ID,
-      title: DEFAULT_CONTENT.title,
-      subtitle: DEFAULT_CONTENT.subtitle,
-      eventName: DEFAULT_CONTENT.eventName,
-      dateLabel: DEFAULT_CONTENT.dateLabel,
-      location: DEFAULT_CONTENT.location,
-      priceAttendee: DEFAULT_CONTENT.priceAttendee,
-      priceExhibitor: DEFAULT_CONTENT.priceExhibitor,
-      bullets: JSON.stringify(DEFAULT_CONTENT.bullets),
-      registerUrl: DEFAULT_CONTENT.registerUrl,
-      hotelsUrl: DEFAULT_CONTENT.hotelsUrl,
-      bodyHtml: DEFAULT_CONTENT.bodyHtml,
-      heroImageUrl: DEFAULT_CONTENT.heroImageUrl,
-      images: JSON.stringify(DEFAULT_CONTENT.images),
+      ...inputToData(DEFAULT_CONTENT),
       version: 1,
       publishedAt: new Date(),
     },
   });
-
-  return mapPage(created);
 }
 
-export async function saveSafetyDaysPage(input: SafetyDaysInput) {
-  const page = await prisma.notificationPage.upsert({
-    where: { id: SAFETY_DAYS_ID },
-    create: {
-      id: SAFETY_DAYS_ID,
-      title: input.title,
-      subtitle: input.subtitle ?? null,
-      eventName: input.eventName ?? null,
-      dateLabel: input.dateLabel ?? null,
-      location: input.location ?? null,
-      priceAttendee: input.priceAttendee ?? null,
-      priceExhibitor: input.priceExhibitor ?? null,
-      bullets: JSON.stringify(input.bullets),
-      registerUrl: input.registerUrl ?? null,
-      hotelsUrl: input.hotelsUrl ?? null,
-      bodyHtml: input.bodyHtml ?? null,
-      heroImageUrl: input.heroImageUrl ?? null,
-      images: JSON.stringify(input.images ?? []),
-      version: 1,
-    },
-    update: {
-      title: input.title,
-      subtitle: input.subtitle ?? null,
-      eventName: input.eventName ?? null,
-      dateLabel: input.dateLabel ?? null,
-      location: input.location ?? null,
-      priceAttendee: input.priceAttendee ?? null,
-      priceExhibitor: input.priceExhibitor ?? null,
-      bullets: JSON.stringify(input.bullets),
-      registerUrl: input.registerUrl ?? null,
-      hotelsUrl: input.hotelsUrl ?? null,
-      bodyHtml: input.bodyHtml ?? null,
-      heroImageUrl: input.heroImageUrl ?? null,
-      images: JSON.stringify(input.images ?? []),
+export async function listNotificationPages(): Promise<NotificationListItem[]> {
+  await ensureNotificationSeed();
+  const pages = await prisma.notificationPage.findMany({
+    orderBy: [{ updatedAt: "desc" }],
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      eventName: true,
+      dateLabel: true,
+      images: true,
+      version: true,
+      publishedAt: true,
+      updatedAt: true,
     },
   });
+  return pages.map((page) =>
+    mapListItem({
+      ...page,
+      createdAt: page.updatedAt,
+    }),
+  );
+}
 
+export async function getNotificationPage(id: string) {
+  const page = await prisma.notificationPage.findUnique({ where: { id } });
+  return page ? mapPage(page) : null;
+}
+
+export async function createNotificationPage(input?: Partial<SafetyDaysInput>) {
+  await ensureNotificationSeed();
+  const data = inputToData({
+    title: input?.title?.trim() || "Untitled notification",
+    subtitle: input?.subtitle ?? null,
+    eventName: input?.eventName ?? null,
+    dateLabel: input?.dateLabel ?? null,
+    location: input?.location ?? null,
+    priceAttendee: input?.priceAttendee ?? null,
+    priceExhibitor: input?.priceExhibitor ?? null,
+    bullets: input?.bullets ?? [],
+    registerUrl: input?.registerUrl ?? null,
+    hotelsUrl: input?.hotelsUrl ?? null,
+    bodyHtml: input?.bodyHtml ?? null,
+    heroImageUrl: input?.heroImageUrl ?? null,
+    images: input?.images ?? [],
+  });
+
+  const page = await prisma.notificationPage.create({
+    data: {
+      ...data,
+      version: 1,
+      publishedAt: null,
+    },
+  });
   return mapPage(page);
 }
 
-export async function publishSafetyDaysPage() {
-  const existing = await ensureSafetyDaysPage();
+export async function updateNotificationPage(
+  id: string,
+  input: SafetyDaysInput,
+) {
+  const page = await prisma.notificationPage.update({
+    where: { id },
+    data: inputToData(input),
+  });
+  return mapPage(page);
+}
+
+export async function deleteNotificationPage(id: string) {
+  await prisma.notificationPage.delete({ where: { id } });
+}
+
+export async function publishNotificationPage(id: string) {
+  const existing = await prisma.notificationPage.findUnique({ where: { id } });
+  if (!existing) return null;
 
   const page = await prisma.notificationPage.update({
-    where: { id: SAFETY_DAYS_ID },
+    where: { id },
     data: {
       version: existing.version + 1,
       publishedAt: new Date(),
     },
   });
-
   return mapPage(page);
 }
+
+/** Latest published page for mobile, or any page as fallback. */
+export async function getPublicNotificationPage(id?: string | null) {
+  await ensureNotificationSeed();
+
+  if (id) {
+    const page = await prisma.notificationPage.findUnique({ where: { id } });
+    return page ? mapPage(page) : null;
+  }
+
+  const latestPublished = await prisma.notificationPage.findFirst({
+    where: { publishedAt: { not: null } },
+    orderBy: { publishedAt: "desc" },
+  });
+  if (latestPublished) return mapPage(latestPublished);
+
+  const latest = await prisma.notificationPage.findFirst({
+    orderBy: { updatedAt: "desc" },
+  });
+  return latest ? mapPage(latest) : null;
+}
+
+/** @deprecated Prefer getNotificationPage / listNotificationPages */
+export async function ensureSafetyDaysPage() {
+  await ensureNotificationSeed();
+  const legacy = await getNotificationPage(SAFETY_DAYS_ID);
+  if (legacy) return legacy;
+  const pages = await listNotificationPages();
+  const first = pages[0];
+  if (!first) {
+    return createNotificationPage(DEFAULT_CONTENT);
+  }
+  return (await getNotificationPage(first.id))!;
+}
+
+/** @deprecated Prefer updateNotificationPage */
+export async function saveSafetyDaysPage(input: SafetyDaysInput) {
+  await ensureNotificationSeed();
+  const existing = await prisma.notificationPage.findUnique({
+    where: { id: SAFETY_DAYS_ID },
+  });
+  if (existing) {
+    return updateNotificationPage(SAFETY_DAYS_ID, input);
+  }
+  const pages = await listNotificationPages();
+  if (pages[0]) {
+    return updateNotificationPage(pages[0].id, input);
+  }
+  return createNotificationPage(input);
+}
+
+/** @deprecated Prefer publishNotificationPage */
+export async function publishSafetyDaysPage() {
+  const page = await ensureSafetyDaysPage();
+  return (await publishNotificationPage(page.id))!;
+}
+

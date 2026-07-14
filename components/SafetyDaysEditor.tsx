@@ -3,8 +3,9 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { SafetyDaysContent, SafetyDaysImage } from "@/lib/notifications";
 import { SafetyDaysPreview } from "@/components/SafetyDaysPreview";
-import { PlusIcon, SaveIcon, SendIcon, TrashIcon } from "@/components/icons";
 import { FixedPreviewAnchor } from "@/components/FixedPreviewAnchor";
+import { AdminToolbarActions } from "@/components/AdminToolbar";
+import { PlusIcon, SaveIcon, SendIcon, TrashIcon } from "@/components/icons";
 import {
   btnDangerBlock,
   btnDangerSm,
@@ -197,7 +198,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
     setIsSaving(true);
 
     try {
-      const response = await fetch("/api/notifications/safety-days", {
+      const response = await fetch(`/api/notifications/pages/${initialData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -231,11 +232,14 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
     setIsNotifying(true);
 
     try {
-      const saveResponse = await fetch("/api/notifications/safety-days", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const saveResponse = await fetch(
+        `/api/notifications/pages/${initialData.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
       const saved = await saveResponse.json().catch(() => null);
       if (!saveResponse.ok) {
         setError(saved?.error ?? "Failed to save before notify");
@@ -243,7 +247,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       }
 
       const notifyResponse = await fetch(
-        "/api/notifications/safety-days/notify",
+        `/api/notifications/pages/${initialData.id}/notify`,
         { method: "POST" },
       );
       const notified = await notifyResponse.json().catch(() => null);
@@ -263,6 +267,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       setStatus(
         `Published version ${notified.page.version}. The mobile app can now fetch the update.`,
       );
+      if (notified.warning) setError(notified.warning);
     } catch {
       setError("Unable to reach the server");
     } finally {
@@ -340,27 +345,32 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
 
   return (
     <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-      <form onSubmit={handleSave} className="order-2 space-y-4 lg:order-1">
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="submit"
-            disabled={isSaving || isNotifying}
-            className={btnPrimary}
-          >
-            <SaveIcon className="h-4 w-4 shrink-0" />
-            {isSaving ? "Saving…" : "Save"}
-          </button>
-          <button
-            type="button"
-            onClick={handleNotify}
-            disabled={isSaving || isNotifying}
-            className={btnPrimary}
-          >
-            <SendIcon className="h-4 w-4 shrink-0" />
-            {isNotifying ? "Push Notification…" : "Push Notification"}
-          </button>
-        </div>
+      <AdminToolbarActions>
+        <button
+          type="submit"
+          form="notification-content-form"
+          disabled={isSaving || isNotifying}
+          className={btnPrimary}
+        >
+          <SaveIcon className="h-4 w-4 shrink-0" />
+          {isSaving ? "Saving…" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={handleNotify}
+          disabled={isSaving || isNotifying}
+          className={btnPrimary}
+        >
+          <SendIcon className="h-4 w-4 shrink-0" />
+          {isNotifying ? "Push Notification…" : "Push Notification"}
+        </button>
+      </AdminToolbarActions>
 
+      <form
+        id="notification-content-form"
+        onSubmit={handleSave}
+        className="order-2 space-y-4 lg:order-1"
+      >
         <p className="text-xs text-(--admin-text-muted)">
           Version {version}
           {publishedAt

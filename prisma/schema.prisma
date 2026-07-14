@@ -35,7 +35,7 @@ model AnalyticsEvent {
 }
 
 model NotificationPage {
-  id             String    @id @default("safety-days")
+  id             String    @id @default(cuid())
   title          String
   subtitle       String?
   eventName      String?
@@ -43,7 +43,7 @@ model NotificationPage {
   location       String?
   priceAttendee  String?
   priceExhibitor String?
-  bullets        String
+  bullets        String    @default("[]")
   registerUrl    String?
   hotelsUrl      String?
   bodyHtml       String?
@@ -51,5 +51,9 @@ model NotificationPage {
   images         String    @default("[]")
   version        Int       @default(1)
   publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([publishedAt])
+  @@index([updatedAt])
 }

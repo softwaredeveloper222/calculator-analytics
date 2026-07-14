@@ -68,7 +68,7 @@ export function SafetyDaysPreview({
       </p>
 
       <div
-        className="relative mx-auto flex max-h-[calc(100vh-8.5rem)] max-h-[calc(100dvh-8.5rem)] flex-col rounded-[2.25rem] border border-slate-800 bg-slate-900 p-3 shadow-[0_24px_60px_rgba(15,23,42,0.35)]"
+        className="relative mx-auto flex h-[calc(100vh-8.5rem)] h-[calc(100dvh-8.5rem)] max-h-[calc(100vh-8.5rem)] max-h-[calc(100dvh-8.5rem)] flex-col rounded-[2.25rem] border border-slate-800 bg-slate-900 p-3 shadow-[0_24px_60px_rgba(15,23,42,0.35)]"
       >
         {/* Side buttons */}
         <div
@@ -106,7 +106,7 @@ export function SafetyDaysPreview({
             style={{ color: styles.body }}
           >
             <div
-              className="space-y-3 px-4 py-5"
+              className="min-h-full space-y-3 px-4 py-5"
               style={{ background: styles.pageBg }}
             >
               <h1

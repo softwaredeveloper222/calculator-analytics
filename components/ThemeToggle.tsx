@@ -6,8 +6,10 @@ import { btnChrome } from "@/lib/button-styles";
 
 export function ThemeToggle({
   className = "",
+  compact = false,
 }: {
   className?: string;
+  compact?: boolean;
 }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -25,7 +27,7 @@ export function ThemeToggle({
       ) : (
         <MoonIcon className="h-4 w-4 shrink-0" />
       )}
-      <span>{isDark ? "Light" : "Dark"}</span>
+      {!compact ? <span>{isDark ? "Light" : "Dark"}</span> : null}
     </button>
   );
 }

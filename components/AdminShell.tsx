@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  AdminToolbarProvider,
+  AdminToolbarSlot,
+} from "@/components/AdminToolbar";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
 import {
   BellIcon,
@@ -51,28 +55,31 @@ function sectionMeta(pathname: string) {
     }
   );
 }
+
 function SidebarToggleControl({
   expanded,
   onToggle,
   compact,
+  label,
 }: {
   expanded: boolean;
   onToggle: () => void;
   compact?: boolean;
+  label?: string;
 }) {
+  const text =
+    label ?? (expanded ? "Collapse" : "Expand");
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+      aria-label={text}
       aria-expanded={expanded}
-      title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+      title={text}
       className={compact ? btnChromeIcon : `${btnSecondary} h-9 w-full text-xs`}
     >
       <PanelIcon className="h-4 w-4 shrink-0" />
-      {!compact ? (
-        <span>{expanded ? "Collapse" : "Expand"}</span>
-      ) : null}
+      {!compact ? <span>{text}</span> : null}
     </button>
   );
 }
@@ -131,17 +138,56 @@ function SidebarNav({
   );
 }
 
-function SidebarBrand({ expanded }: { expanded: boolean }) {
+function SidebarBrand({
+  expanded,
+  onToggleExpand,
+  toggleLabel,
+}: {
+  expanded: boolean;
+  onToggleExpand: () => void;
+  toggleLabel?: string;
+}) {
   return (
-    <div className="border-b border-(--admin-border) px-4 py-5">
-      <p className="text-[11px] font-semibold tracking-[0.28em] text-(--admin-accent-text) uppercase">
-        GCAP
-      </p>
-      {expanded ? (
-        <p className="mt-1.5 text-base font-semibold tracking-tight text-(--admin-text)">
-          Admin
-        </p>
-      ) : null}
+    <div className="border-b border-(--admin-border)">
+      <div className="px-3 pt-3 pb-2">
+        <SidebarToggleControl
+          expanded={expanded}
+          onToggle={onToggleExpand}
+          compact={!expanded}
+          label={toggleLabel}
+        />
+      </div>
+      <div className={expanded ? "px-4 pb-4" : "flex justify-center px-3 pb-3"}>
+        {expanded ? (
+          <p className="flex items-baseline gap-2.5">
+            <span className="text-xs font-semibold tracking-[0.28em] text-(--admin-accent-text) uppercase">
+              GCAP
+            </span>
+            <span className="text-lg font-semibold tracking-tight text-(--admin-text)">
+              Admin
+            </span>
+          </p>
+        ) : (
+          <p className="text-xs font-semibold tracking-[0.28em] text-(--admin-accent-text) uppercase">
+            GCAP
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SidebarFooter({ expanded }: { expanded: boolean }) {
+  return (
+    <div className="space-y-2 border-t border-(--admin-border) p-3">
+      <ThemeToggle
+        compact={!expanded}
+        className={expanded ? `${btnSecondary} h-9 w-full` : btnChromeIcon}
+      />
+      <LogoutButton
+        compact={!expanded}
+        className={expanded ? `${btnSecondary} h-9 w-full` : btnChromeIcon}
+      />
     </div>
   );
 }
@@ -151,11 +197,13 @@ function SidebarPanel({
   expanded,
   onToggleExpand,
   onNavigate,
+  toggleLabel,
 }: {
   pathname: string;
   expanded: boolean;
   onToggleExpand: () => void;
   onNavigate?: () => void;
+  toggleLabel?: string;
 }) {
   return (
     <div
@@ -165,24 +213,22 @@ function SidebarPanel({
           : "flex h-full w-16 flex-col"
       }
     >
-      <SidebarBrand expanded={expanded} />
+      <SidebarBrand
+        expanded={expanded}
+        onToggleExpand={onToggleExpand}
+        toggleLabel={toggleLabel}
+      />
       <SidebarNav
         pathname={pathname}
         expanded={expanded}
         onNavigate={onNavigate}
       />
-      <div className="border-t border-(--admin-border) p-3">
-        <SidebarToggleControl
-          expanded={expanded}
-          onToggle={onToggleExpand}
-          compact={!expanded}
-        />
-      </div>
+      <SidebarFooter expanded={expanded} />
     </div>
   );
 }
 
-export function AdminShell({ children }: { children: ReactNode }) {
+function AdminShellFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/hub";
   const [expanded, setExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -268,34 +314,37 @@ export function AdminShell({ children }: { children: ReactNode }) {
             expanded
             onToggleExpand={() => setMobileOpen(false)}
             onNavigate={() => setMobileOpen(false)}
+            toggleLabel="Close"
           />
         </aside>
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="glass-menubar sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-(--admin-border) px-4 sm:px-6">
-          <button
-            type="button"
-            className={`${btnChrome} lg:hidden`}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            <MenuIcon className="h-4 w-4 shrink-0" />
-            <span>Menu</span>
-          </button>
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 truncate text-sm font-semibold tracking-tight text-(--admin-text)">
-              <section.icon className="h-4 w-4 shrink-0 text-(--admin-accent-text)" />
-              <span className="truncate">{section.label}</span>
-            </p>
-            <p className="truncate text-xs text-(--admin-text-muted)">
-              {section.description}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
-            <LogoutButton />
+        <header className="glass-menubar sticky top-0 z-30 border-b border-(--admin-border)">
+          <div className="relative flex min-h-14 w-full items-center py-2">
+            <div className="z-10 flex min-w-0 items-center gap-3 pl-3 sm:pl-4">
+              <button
+                type="button"
+                className={`${btnChrome} lg:hidden`}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen((open) => !open)}
+              >
+                <MenuIcon className="h-4 w-4 shrink-0" />
+                <span>Menu</span>
+              </button>
+              <p className="flex min-w-0 items-center gap-3 truncate text-left text-2xl font-semibold tracking-tight text-(--admin-text)">
+                <section.icon className="h-7 w-7 shrink-0 text-(--admin-accent-text)" />
+                <span className="truncate">{section.label}</span>
+              </p>
+            </div>
+
+            {/* Match main content right edge: max-w + horizontal padding */}
+            <div className="pointer-events-none absolute inset-0 mx-auto flex w-full max-w-[1600px] items-center justify-end px-4 sm:px-6 lg:px-8">
+              <div className="pointer-events-auto">
+                <AdminToolbarSlot />
+              </div>
+            </div>
           </div>
         </header>
 
@@ -304,5 +353,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
+  );
+}
+
+export function AdminShell({ children }: { children: ReactNode }) {
+  return (
+    <AdminToolbarProvider>
+      <AdminShellFrame>{children}</AdminShellFrame>
+    </AdminToolbarProvider>
   );
 }

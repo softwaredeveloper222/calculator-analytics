@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from "next/server";
+import { safetyDaysInputSchema } from "@/lib/notification-validators";
+import {
+  createNotificationPage,
+  listNotificationPages,
+} from "@/lib/notifications";
+import { getServerSession } from "@/lib/session";
+
+export async function GET() {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const pages = await listNotificationPages();
+    return NextResponse.json({ pages });
+  } catch (error) {
+    console.error("Failed to list notification pages:", error);
+    return NextResponse.json(
+      { error: "Failed to list notification pages" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: unknown = {};
+  try {
+    const text = await request.text();
+    if (text.trim()) body = JSON.parse(text);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const parsed = safetyDaysInputSchema.partial().safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const page = await createNotificationPage({
+      ...parsed.data,
+      title: parsed.data.title?.trim() || "Untitled notification",
+      bullets: parsed.data.bullets ?? [],
+      registerUrl: parsed.data.registerUrl || null,
+      hotelsUrl: parsed.data.hotelsUrl || null,
+      heroImageUrl: parsed.data.heroImageUrl || null,
+    });
+    return NextResponse.json(page, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create notification page:", error);
+    return NextResponse.json(
+      { error: "Failed to create notification page" },
+      { status: 500 },
+    );
+  }
+}
