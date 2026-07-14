@@ -11,12 +11,14 @@ type PaginationProps = {
   pagination: PaginationMeta;
   onPageChange: (page: number) => void;
   disabled?: boolean;
+  itemLabel?: string;
 };
 
 export function Pagination({
   pagination,
   onPageChange,
   disabled = false,
+  itemLabel = "events",
 }: PaginationProps) {
   const { page, totalPages, totalEvents, hasPrevious, hasNext } = pagination;
 
@@ -25,7 +27,7 @@ export function Pagination({
   return (
     <div className="flex flex-col gap-4 border-t border-(--admin-border) pt-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-(--admin-text-muted)">
-        Page {page} of {totalPages} · {totalEvents} total events
+        Page {page} of {totalPages} · {totalEvents} total {itemLabel}
       </p>
 
       <div className="flex flex-wrap items-center gap-2">

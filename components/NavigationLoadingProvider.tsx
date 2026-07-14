@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -13,6 +14,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 type NavigationLoadingContextValue = {
   startNavigation: () => void;
+  beginProgress: () => void;
+  endProgress: () => void;
 };
 
 const NavigationLoadingContext =
@@ -31,25 +34,44 @@ export function NavigationLoadingProvider({
   const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
   const clearTimerRef = useRef<number | null>(null);
+  const progressCountRef = useRef(0);
 
-  const clearNavigating = useCallback(() => {
-    setIsNavigating(false);
+  const clearTimer = useCallback(() => {
     if (clearTimerRef.current !== null) {
       window.clearTimeout(clearTimerRef.current);
       clearTimerRef.current = null;
     }
   }, []);
 
+  const clearNavigating = useCallback(() => {
+    progressCountRef.current = 0;
+    setIsNavigating(false);
+    clearTimer();
+  }, [clearTimer]);
+
   const startNavigation = useCallback(() => {
     setIsNavigating(true);
-    if (clearTimerRef.current !== null) {
-      window.clearTimeout(clearTimerRef.current);
-    }
+    clearTimer();
     // Keep feedback brief; route segments stream their own data loaders.
     clearTimerRef.current = window.setTimeout(() => {
-      setIsNavigating(false);
+      if (progressCountRef.current === 0) {
+        setIsNavigating(false);
+      }
       clearTimerRef.current = null;
     }, 1200);
+  }, [clearTimer]);
+
+  const beginProgress = useCallback(() => {
+    clearTimer();
+    progressCountRef.current += 1;
+    setIsNavigating(true);
+  }, [clearTimer]);
+
+  const endProgress = useCallback(() => {
+    progressCountRef.current = Math.max(0, progressCountRef.current - 1);
+    if (progressCountRef.current === 0) {
+      setIsNavigating(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -58,11 +80,9 @@ export function NavigationLoadingProvider({
 
   useEffect(() => {
     return () => {
-      if (clearTimerRef.current !== null) {
-        window.clearTimeout(clearTimerRef.current);
-      }
+      clearTimer();
     };
-  }, []);
+  }, [clearTimer]);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -103,8 +123,13 @@ export function NavigationLoadingProvider({
     return () => document.removeEventListener("click", onClick, true);
   }, [startNavigation]);
 
+  const value = useMemo(
+    () => ({ startNavigation, beginProgress, endProgress }),
+    [startNavigation, beginProgress, endProgress],
+  );
+
   return (
-    <NavigationLoadingContext.Provider value={{ startNavigation }}>
+    <NavigationLoadingContext.Provider value={value}>
       {children}
       {isNavigating ? (
         <div

@@ -2,19 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { safetyDaysInputSchema } from "@/lib/notification-validators";
 import {
   createNotificationPage,
-  listNotificationPages,
+  listNotificationPagesPaginated,
 } from "@/lib/notifications";
 import { getServerSession } from "@/lib/session";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getServerSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const pages = await listNotificationPages();
-    return NextResponse.json({ pages });
+    const { searchParams } = request.nextUrl;
+    const result = await listNotificationPagesPaginated(
+      searchParams.get("page") ?? undefined,
+      searchParams.get("pageSize") ?? undefined,
+    );
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Failed to list notification pages:", error);
     return NextResponse.json(

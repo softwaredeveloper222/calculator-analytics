@@ -1,4 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import {
+  MAX_PAGE_SIZE,
+  buildPaginationMeta,
+  normalizePagination,
+} from "@/lib/pagination";
 
 export const SAFETY_DAYS_ID = "safety-days";
 
@@ -356,28 +361,81 @@ export async function ensureNotificationSeed() {
   });
 }
 
-export async function listNotificationPages(): Promise<NotificationListItem[]> {
-  await ensureNotificationSeed();
-  const pages = await prisma.notificationPage.findMany({
-    orderBy: [{ updatedAt: "desc" }],
-    select: {
-      id: true,
-      title: true,
-      subtitle: true,
-      eventName: true,
-      dateLabel: true,
-      images: true,
-      version: true,
-      publishedAt: true,
-      updatedAt: true,
-    },
-  });
-  return pages.map((page) =>
-    mapListItem({
-      ...page,
-      createdAt: page.updatedAt,
+const listSelect = {
+  id: true,
+  title: true,
+  subtitle: true,
+  eventName: true,
+  dateLabel: true,
+  images: true,
+  version: true,
+  publishedAt: true,
+  updatedAt: true,
+} as const;
+
+export async function listNotificationPagesPaginated(
+  pageInput?: string | number,
+  pageSizeInput?: string | number,
+) {
+  const { page, pageSize } = normalizePagination(pageInput, pageSizeInput);
+
+  // One parallel round-trip instead of seed-count → count → findMany.
+  let [total, rows] = await Promise.all([
+    prisma.notificationPage.count(),
+    prisma.notificationPage.findMany({
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: listSelect,
     }),
-  );
+  ]);
+
+  if (total === 0) {
+    await prisma.notificationPage.create({
+      data: {
+        id: SAFETY_DAYS_ID,
+        ...inputToData(DEFAULT_CONTENT),
+        version: 1,
+        publishedAt: new Date(),
+      },
+    });
+    const seeded = await prisma.notificationPage.findMany({
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+      take: pageSize,
+      select: listSelect,
+    });
+    return {
+      pages: seeded.map((item) =>
+        mapListItem({ ...item, createdAt: item.updatedAt }),
+      ),
+      pagination: buildPaginationMeta(1, { page: 1, pageSize }),
+    };
+  }
+
+  const pagination = buildPaginationMeta(total, { page, pageSize });
+  if (pagination.page !== page) {
+    rows = await prisma.notificationPage.findMany({
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+      skip: (pagination.page - 1) * pageSize,
+      take: pageSize,
+      select: listSelect,
+    });
+  }
+
+  return {
+    pages: rows.map((item) =>
+      mapListItem({
+        ...item,
+        createdAt: item.updatedAt,
+      }),
+    ),
+    pagination,
+  };
+}
+
+export async function listNotificationPages(): Promise<NotificationListItem[]> {
+  const result = await listNotificationPagesPaginated(1, MAX_PAGE_SIZE);
+  return result.pages;
 }
 
 export async function getNotificationPage(id: string) {
@@ -419,7 +477,10 @@ export async function updateNotificationPage(
 ) {
   const page = await prisma.notificationPage.update({
     where: { id },
-    data: inputToData(input),
+    data: {
+      ...inputToData(input),
+      updatedAt: new Date(),
+    },
   });
   return mapPage(page);
 }
@@ -437,6 +498,7 @@ export async function publishNotificationPage(id: string) {
     data: {
       version: existing.version + 1,
       publishedAt: new Date(),
+      updatedAt: new Date(),
     },
   });
   return mapPage(page);

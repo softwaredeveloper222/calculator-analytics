@@ -1,6 +1,6 @@
 import { NotificationContentList } from "@/components/NotificationContentList";
 import { SuspendedSection } from "@/components/SuspendedSection";
-import { listNotificationPages } from "@/lib/notifications";
+import { listNotificationPagesPaginated } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +14,8 @@ export default function NotificationsPage() {
 
 async function NotificationsListBody() {
   try {
-    const pages = await listNotificationPages();
-    return <NotificationContentList initialPages={pages} />;
+    const initialData = await listNotificationPagesPaginated(1, 10);
+    return <NotificationContentList initialData={initialData} />;
   } catch (error) {
     console.error("Failed to load notifications CMS:", error);
     return (
