@@ -15,6 +15,7 @@ export async function POST() {
     const push = await sendSafetyDaysPush({
       version: page.version,
       title: page.title,
+      dateLabel: page.dateLabel,
       contentId: page.id,
     });
 

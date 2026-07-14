@@ -112,16 +112,21 @@ async function listMessageablePlayerIds(
 function basePayload(input: {
   version: number;
   title: string;
+  dateLabel?: string | null;
   contentId?: string | null;
 }): Record<string, unknown> {
+  const date = input.dateLabel?.trim() || "";
   return {
-    headings: { en: "Safety Days update" },
+    // Mobile notification banner: Title as heading, Date as body
+    headings: { en: input.title },
     contents: {
-      en: `New ${input.title} content is available (v${input.version}).`,
+      en: date ? `Date: ${date}` : "Safety Days content has been updated.",
     },
     data: {
       type: "safety_days",
       version: String(input.version),
+      title: input.title,
+      ...(date ? { dateLabel: date } : {}),
       ...(input.contentId
         ? { contentId: input.contentId, id: input.contentId }
         : {}),
@@ -138,6 +143,7 @@ function basePayload(input: {
 export async function sendSafetyDaysPush(input: {
   version: number;
   title?: string | null;
+  dateLabel?: string | null;
   contentId?: string | null;
 }): Promise<SafetyDaysPushResult> {
   const appId = process.env.ONESIGNAL_APP_ID?.trim();
@@ -155,6 +161,7 @@ export async function sendSafetyDaysPush(input: {
   const shared = basePayload({
     version: input.version,
     title: eventTitle,
+    dateLabel: input.dateLabel,
     contentId: input.contentId,
   });
 
