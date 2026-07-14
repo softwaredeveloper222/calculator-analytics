@@ -56,9 +56,26 @@ GET /api/notifications/safety-days/public
 Authorization: Bearer <ANALYTICS_API_KEY>
 ```
 
-Returns the published Safety Days payload and a `version` the Android app can poll.
+Optional query:
+- `?id=<contentId>` — fetch a specific notification page (use the `contentId` from the OneSignal push)
+- `?list=1` — list available pages (`id`, `title`, `version`, `publishedAt`)
 
-**Notify** (`POST /api/notifications/safety-days/notify`, admin session) publishes a new version and, when OneSignal is configured, broadcasts a push with `data.type = "safety_days"` so apps can open the Safety Days screen.
+Default (no `id`) returns the latest **published** page (`publishedAt` desc).
+
+Returns the payload and a `version` the Android app can poll. Each **Notify** bumps a **global** version (higher than every existing page) so multi-content stays compatible with apps that track a single seen version.
+
+**Notify** (`POST /api/notifications/pages/[id]/notify`, admin session) publishes that page and, when OneSignal is configured, broadcasts a push with:
+
+```json
+{
+  "type": "safety_days",
+  "version": "12",
+  "contentId": "<page-id>",
+  "id": "<page-id>"
+}
+```
+
+Legacy `POST /api/notifications/safety-days/notify` still works for the seed/first page.
 
 ## API
 

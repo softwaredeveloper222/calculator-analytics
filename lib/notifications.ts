@@ -493,10 +493,17 @@ export async function publishNotificationPage(id: string) {
   const existing = await prisma.notificationPage.findUnique({ where: { id } });
   if (!existing) return null;
 
+  // Mobile app treats version as a single global counter (seen_version).
+  // Always bump above every page's max so Notify on any content is fresher.
+  const aggregate = await prisma.notificationPage.aggregate({
+    _max: { version: true },
+  });
+  const nextVersion = Math.max(existing.version, aggregate._max.version ?? 0) + 1;
+
   const page = await prisma.notificationPage.update({
     where: { id },
     data: {
-      version: existing.version + 1,
+      version: nextVersion,
       publishedAt: new Date(),
       updatedAt: new Date(),
     },

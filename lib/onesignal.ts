@@ -46,7 +46,10 @@ export async function sendSafetyDaysPush(input: {
         data: {
           type: "safety_days",
           version: String(input.version),
-          ...(input.contentId ? { contentId: input.contentId } : {}),
+          // Android reads contentId; id is a legacy alias.
+          ...(input.contentId
+            ? { contentId: input.contentId, id: input.contentId }
+            : {}),
         },
       }),
     });
