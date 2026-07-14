@@ -223,7 +223,7 @@ export function getSafetyDaysTemplate(): SafetyDaysInput {
   return {
     ...DEFAULT_CONTENT,
     bullets: [...DEFAULT_CONTENT.bullets],
-    images: DEFAULT_CONTENT.images.map((image) => ({ ...image })),
+    images: DEFAULT_IMAGES.map((image) => ({ ...image })),
   };
 }
 
