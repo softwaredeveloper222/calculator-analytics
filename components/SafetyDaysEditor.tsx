@@ -264,9 +264,12 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
       setHeroImageUrl(nextHeroImageUrl);
       rememberBaseline(nextImages, nextHeroImageUrl);
       setStatus(
-        `Published version ${notified.page.version}. The mobile app can now fetch the update.`,
+        notified.push?.sent
+          ? `Push sent (v${notified.page.version}). Check OneSignal → Messages.`
+          : `Published v${notified.page.version}, but push was NOT sent to OneSignal.`,
       );
       if (notified.warning) setError(notified.warning);
+      if (notified.push?.error) setError(notified.push.error);
     } catch {
       setError("Unable to reach the server");
     } finally {

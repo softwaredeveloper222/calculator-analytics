@@ -25,8 +25,8 @@ export async function POST() {
       page,
       push,
       message: push.sent
-        ? "Notification published and push sent to mobile apps"
-        : "Notification published for the mobile app",
+        ? "Notification published and push sent to OneSignal"
+        : "Content published, but OneSignal did not create a push message",
       warning: push.warning ?? push.error ?? undefined,
     });
   } catch (error) {

@@ -168,8 +168,13 @@ export function NotificationContentList({
       }
       // Notify bumps updatedAt — jump to page 1 so it appears first.
       await loadPage(1, pagination.pageSize);
-      setStatus(data?.message ?? "Notification published.");
+      setStatus(
+        data?.push?.sent
+          ? (data?.message ?? "Push sent to OneSignal.")
+          : `Published, but push was NOT sent${data?.push?.error || data?.warning ? "" : "."}`,
+      );
       if (data?.warning) setError(data.warning);
+      if (data?.push?.error) setError(data.push.error);
       router.refresh();
     } catch {
       setError("Unable to reach the server");
