@@ -4,6 +4,15 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { SafetyDaysContent, SafetyDaysImage } from "@/lib/notifications";
 import { SafetyDaysPreview } from "@/components/SafetyDaysPreview";
 import { PlusIcon, SaveIcon, SendIcon, TrashIcon } from "@/components/icons";
+import { FixedPreviewAnchor } from "@/components/FixedPreviewAnchor";
+import {
+  btnDangerBlock,
+  btnDangerSm,
+  btnPrimary,
+  btnPrimaryBlock,
+  btnPrimarySm,
+  btnSecondaryBlock,
+} from "@/lib/button-styles";
 
 type SafetyDaysEditorProps = {
   initialData: SafetyDaysContent;
@@ -330,13 +339,13 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
   }, [images.length]);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-      <form onSubmit={handleSave} className="space-y-4">
+    <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+      <form onSubmit={handleSave} className="order-2 space-y-4 lg:order-1">
         <div className="flex flex-wrap gap-3">
           <button
             type="submit"
             disabled={isSaving || isNotifying}
-            className="inline-flex items-center gap-2 rounded-lg border-2 border-(--admin-accent) bg-(--admin-accent) px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110 disabled:opacity-50"
+            className={btnPrimary}
           >
             <SaveIcon className="h-4 w-4 shrink-0" />
             {isSaving ? "Saving…" : "Save"}
@@ -345,7 +354,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
             type="button"
             onClick={handleNotify}
             disabled={isSaving || isNotifying}
-            className="inline-flex items-center gap-2 rounded-lg bg-(--admin-accent) px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
+            className={btnPrimary}
           >
             <SendIcon className="h-4 w-4 shrink-0" />
             {isNotifying ? "Push Notification…" : "Push Notification"}
@@ -460,7 +469,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
             <button
               type="button"
               onClick={addImage}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-(--admin-accent) px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
+              className={btnPrimarySm}
             >
               <PlusIcon className="h-4 w-4 shrink-0" />
               Add image
@@ -516,7 +525,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
                           type="button"
                           onClick={() => requestRemoveImage(index)}
                           disabled={Boolean(removingClientId)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-rose-500 disabled:opacity-50"
+                          className={btnDangerSm}
                         >
                           <TrashIcon className="h-3.5 w-3.5 shrink-0" />
                           Remove
@@ -532,7 +541,7 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
           <button
             type="button"
             onClick={addImage}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-(--admin-accent) px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
+            className={btnPrimaryBlock}
           >
             <PlusIcon className="h-4 w-4 shrink-0" />
             Add image
@@ -571,14 +580,14 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
               <button
                 type="button"
                 onClick={() => setPendingRemoveIndex(null)}
-                className="inline-flex w-full items-center justify-center rounded-lg border border-(--admin-border) px-4 py-2.5 text-sm font-medium text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover)"
+                className={btnSecondaryBlock}
               >
                 No
               </button>
               <button
                 type="button"
                 onClick={() => removeImage(pendingRemoveIndex)}
-                className="inline-flex w-full items-center justify-center rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-500"
+                className={btnDangerBlock}
               >
                 Yes
               </button>
@@ -587,21 +596,23 @@ export function SafetyDaysEditor({ initialData }: SafetyDaysEditorProps) {
         </div>
       ) : null}
 
-      <SafetyDaysPreview
-        title={title}
-        subtitle={subtitle}
-        eventName={eventName}
-        dateLabel={dateLabel}
-        location={location}
-        priceAttendee={priceAttendee}
-        priceExhibitor={priceExhibitor}
-        bullets={bullets}
-        registerUrl={registerUrl}
-        hotelsUrl={hotelsUrl}
-        bodyHtml=""
-        heroImageUrl={heroImageUrl}
-        images={images}
-      />
+      <FixedPreviewAnchor>
+        <SafetyDaysPreview
+          title={title}
+          subtitle={subtitle}
+          eventName={eventName}
+          dateLabel={dateLabel}
+          location={location}
+          priceAttendee={priceAttendee}
+          priceExhibitor={priceExhibitor}
+          bullets={bullets}
+          registerUrl={registerUrl}
+          hotelsUrl={hotelsUrl}
+          bodyHtml=""
+          heroImageUrl={heroImageUrl}
+          images={images}
+        />
+      </FixedPreviewAnchor>
     </div>
   );
 }

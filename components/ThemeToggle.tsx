@@ -2,6 +2,7 @@
 
 import { useTheme } from "@/components/ThemeProvider";
 import { MoonIcon, SunIcon } from "@/components/icons";
+import { btnChrome } from "@/lib/button-styles";
 
 export function ThemeToggle({
   className = "",
@@ -15,10 +16,7 @@ export function ThemeToggle({
     <button
       type="button"
       onClick={toggleTheme}
-      className={
-        className ||
-        "inline-flex h-9 items-center gap-2 rounded-xl border border-(--admin-border) px-3 text-sm text-(--admin-text-secondary) transition hover:bg-(--admin-btn-secondary-hover) hover:text-(--admin-text)"
-      }
+      className={className || btnChrome}
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       title={isDark ? "Light theme" : "Dark theme"}
     >

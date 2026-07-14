@@ -10,6 +10,7 @@ const eventSelect = {
   event: true,
   calculatorId: true,
   deviceId: true,
+  platform: true,
   deviceManufacturer: true,
   deviceModel: true,
   deviceBrand: true,
@@ -35,6 +36,7 @@ function mapEvent(event: {
   event: string;
   calculatorId: string | null;
   deviceId: string;
+  platform: string;
   deviceManufacturer: string | null;
   deviceModel: string | null;
   deviceBrand: string | null;
@@ -82,17 +84,32 @@ export async function getEventHistory(
     ...(filters.event ? { event: filters.event } : {}),
   };
 
-  const totalEvents = await prisma.analyticsEvent.count({ where });
-  const pagination = buildPaginationMeta(totalEvents, { page, pageSize });
-  const skip = (pagination.page - 1) * pagination.pageSize;
+  // Count and page fetch in parallel; resolve page clamp after count returns.
+  const [totalEvents, roughEvents] = await Promise.all([
+    prisma.analyticsEvent.count({ where }),
+    prisma.analyticsEvent.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: eventSelect,
+    }),
+  ]);
 
-  const events = await prisma.analyticsEvent.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    skip,
-    take: pagination.pageSize,
-    select: eventSelect,
-  });
+  const pagination = buildPaginationMeta(totalEvents, { page, pageSize });
+  const safeSkip = (pagination.page - 1) * pagination.pageSize;
+  const requestedSkip = (page - 1) * pageSize;
+
+  const events =
+    safeSkip === requestedSkip
+      ? roughEvents
+      : await prisma.analyticsEvent.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip: safeSkip,
+          take: pagination.pageSize,
+          select: eventSelect,
+        });
 
   return {
     range: { from: rangeFrom.toISOString(), to: rangeTo.toISOString() },
@@ -119,63 +136,78 @@ export async function getAnalyticsOverview(from?: Date, to?: Date) {
     },
   };
 
-  const [
-    totalEvents,
-    opensByCalculator,
-    eventsByType,
-    devicesRaw,
-  ] = await Promise.all([
-    prisma.analyticsEvent.count({ where }),
-    prisma.analyticsEvent.groupBy({
-      by: ["calculatorId"],
-      where: {
-        ...where,
-        event: "calculator_opened",
-        calculatorId: { not: null },
-      },
-      _count: { _all: true },
-      orderBy: { _count: { calculatorId: "desc" } },
-    }),
-    prisma.analyticsEvent.groupBy({
-      by: ["event"],
-      where,
-      _count: { _all: true },
-      orderBy: { _count: { event: "desc" } },
-    }),
-    prisma.analyticsEvent.groupBy({
-      by: ["deviceId"],
-      where,
-      _count: { _all: true },
-      orderBy: { _count: { deviceId: "desc" } },
-    }),
-  ]);
+  const [totalEvents, opensByCalculator, eventsByType, platformRows, uniqueRows] =
+    await Promise.all([
+      prisma.analyticsEvent.count({ where }),
+      prisma.analyticsEvent.groupBy({
+        by: ["calculatorId"],
+        where: {
+          ...where,
+          event: "calculator_opened",
+          calculatorId: { not: null },
+        },
+        _count: { _all: true },
+        orderBy: { _count: { calculatorId: "desc" } },
+      }),
+      prisma.analyticsEvent.groupBy({
+        by: ["event"],
+        where,
+        _count: { _all: true },
+        orderBy: { _count: { event: "desc" } },
+      }),
+      prisma.analyticsEvent.groupBy({
+        by: ["platform"],
+        where,
+        _count: { _all: true },
+        orderBy: { _count: { platform: "desc" } },
+      }),
+      prisma.$queryRaw<
+        Array<{ platform: string; unique_devices: bigint }>
+      >`
+        SELECT
+          COALESCE(LOWER("platform"), 'android') AS platform,
+          COUNT(DISTINCT "deviceId")::bigint AS unique_devices
+        FROM "AnalyticsEvent"
+        WHERE "createdAt" >= ${rangeFrom}
+          AND "createdAt" <= ${rangeTo}
+        GROUP BY COALESCE(LOWER("platform"), 'android')
+      `,
+    ]);
 
-  const uniqueDevices = devicesRaw;
+  const eventCountByPlatform = new Map(
+    platformRows.map((row) => [
+      row.platform.toLowerCase(),
+      row._count._all,
+    ]),
+  );
+  const uniqueByPlatform = new Map(
+    uniqueRows.map((row) => [
+      row.platform.toLowerCase(),
+      Number(row.unique_devices),
+    ]),
+  );
 
-  const deviceIds = devicesRaw.map((row) => row.deviceId);
-  const latestDeviceEvents =
-    deviceIds.length > 0
-      ? await prisma.analyticsEvent.findMany({
-          where: { deviceId: { in: deviceIds } },
-          distinct: ["deviceId"],
-          orderBy: { createdAt: "desc" },
-          select: {
-            deviceId: true,
-            deviceManufacturer: true,
-            deviceModel: true,
-            deviceBrand: true,
-            osVersion: true,
-          },
-        })
-      : [];
-  const latestByDeviceId = new Map(
-    latestDeviceEvents.map((event) => [event.deviceId, event]),
+  const platforms = (
+    [
+      { id: "android", label: "Android" },
+      { id: "ios", label: "iOS" },
+    ] as const
+  ).map((platform) => ({
+    platform: platform.id,
+    label: platform.label,
+    eventCount: eventCountByPlatform.get(platform.id) ?? 0,
+    uniqueDevices: uniqueByPlatform.get(platform.id) ?? 0,
+  }));
+
+  const uniqueDevices = platforms.reduce(
+    (sum, platform) => sum + platform.uniqueDevices,
+    0,
   );
 
   return {
     range: { from: rangeFrom.toISOString(), to: rangeTo.toISOString() },
     totalEvents,
-    uniqueDevices: uniqueDevices.length,
+    uniqueDevices,
     opensByCalculator: opensByCalculator.map((row) => ({
       calculatorId: row.calculatorId,
       count: row._count._all,
@@ -184,22 +216,7 @@ export async function getAnalyticsOverview(from?: Date, to?: Date) {
       event: row.event,
       count: row._count._all,
     })),
-    devices: devicesRaw.map((row) => {
-      const latest = latestByDeviceId.get(row.deviceId);
-      return {
-        deviceId: row.deviceId,
-        label: deviceLabel(
-          latest?.deviceManufacturer ?? null,
-          latest?.deviceModel ?? null,
-          latest?.deviceBrand ?? null,
-        ),
-        manufacturer: latest?.deviceManufacturer ?? null,
-        model: latest?.deviceModel ?? null,
-        brand: latest?.deviceBrand ?? null,
-        osVersion: latest?.osVersion ?? null,
-        eventCount: row._count._all,
-      };
-    }),
+    platforms,
   };
 }
 

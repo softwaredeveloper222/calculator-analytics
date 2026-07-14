@@ -13,7 +13,7 @@ export default function HubPage() {
       <AdminPageHeader
         eyebrow="Workspace"
         title="Choose where to work"
-        description="Jump into Safety Days publishing or calculator usage analytics."
+        description="Jump into Content publishing or calculator usage analytics."
         icon={WorkspaceIcon}
       />
 

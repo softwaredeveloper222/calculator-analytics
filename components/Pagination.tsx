@@ -1,6 +1,11 @@
 "use client";
 
 import type { PaginationMeta } from "@/lib/pagination";
+import {
+  btnChromeIcon,
+  btnSegmentActive,
+  btnSegmentIdle,
+} from "@/lib/button-styles";
 
 type PaginationProps = {
   pagination: PaginationMeta;
@@ -44,10 +49,8 @@ export function Pagination({
               type="button"
               disabled={disabled}
               onClick={() => onPageChange(pageNumber)}
-              className={`min-w-9 rounded-lg px-3 py-2 text-center text-sm ${
-                pageNumber === page
-                  ? "bg-(--admin-accent) text-white"
-                  : "border border-(--admin-border) text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover) disabled:opacity-50"
+              className={`min-w-9 ${
+                pageNumber === page ? btnSegmentActive : btnSegmentIdle
               }`}
             >
               {pageNumber}
@@ -83,11 +86,7 @@ function PageButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border ${
-        disabled
-          ? "border-(--admin-border) text-(--admin-text-muted) opacity-50"
-          : "border-(--admin-border) text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover)"
-      }`}
+      className={btnChromeIcon}
     >
       <ChevronIcon direction={direction} />
     </button>

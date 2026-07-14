@@ -28,6 +28,9 @@ model AnalyticsEvent {
   @@index([calculatorId, createdAt])
   @@index([event, createdAt])
   @@index([deviceId])
+  @@index([deviceId, createdAt])
+  @@index([createdAt])
+  @@index([platform, createdAt])
   @@index([deviceManufacturer, deviceModel])
 }
 

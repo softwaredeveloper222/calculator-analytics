@@ -13,13 +13,14 @@ import {
   MenuIcon,
   PanelIcon,
 } from "@/components/icons";
+import { btnChrome, btnChromeIcon, btnSecondary } from "@/lib/button-styles";
 
 const SIDEBAR_STORAGE_KEY = "gcap-admin-sidebar-expanded";
 
 const NAV_ITEMS = [
   {
     href: "/hub",
-    label: "Hub",
+    label: "Dashboard",
     description: "Overview",
     icon: HubIcon,
   },
@@ -66,11 +67,7 @@ function SidebarToggleControl({
       aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
       aria-expanded={expanded}
       title={expanded ? "Collapse sidebar" : "Expand sidebar"}
-      className={
-        compact
-          ? "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-(--admin-border) text-(--admin-text-secondary) transition hover:bg-(--admin-btn-secondary-hover) hover:text-(--admin-text)"
-          : "inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-(--admin-border) px-3 text-xs font-medium text-(--admin-text-secondary) transition hover:bg-(--admin-btn-secondary-hover) hover:text-(--admin-text)"
-      }
+      className={compact ? btnChromeIcon : `${btnSecondary} h-9 w-full text-xs`}
     >
       <PanelIcon className="h-4 w-4 shrink-0" />
       {!compact ? (
@@ -279,7 +276,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="glass-menubar sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-(--admin-border) px-4 sm:px-6">
           <button
             type="button"
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-(--admin-border) px-3 text-sm text-(--admin-text-secondary) transition hover:bg-(--admin-btn-secondary-hover) hover:text-(--admin-text) lg:hidden"
+            className={`${btnChrome} lg:hidden`}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}

@@ -10,6 +10,11 @@ import {
 import { Pagination } from "@/components/Pagination";
 import { TrashIcon } from "@/components/icons";
 import type { PaginationMeta } from "@/lib/pagination";
+import {
+  btnDangerSm,
+  btnSegmentActive,
+  btnSegmentIdle,
+} from "@/lib/button-styles";
 
 type HistoryData = {
   events: EventRow[];
@@ -160,7 +165,7 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
             type="button"
             disabled={busy || selectedIds.size === 0}
             onClick={handleDelete}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:border-(--admin-border) disabled:bg-transparent disabled:text-(--admin-text-muted)"
+            className={btnDangerSm}
           >
             <TrashIcon className="h-4 w-4" />
             Delete{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
@@ -175,11 +180,9 @@ export function EventHistoryPanel({ initialData }: EventHistoryPanelProps) {
               type="button"
               disabled={busy}
               onClick={() => void loadPage(1, size)}
-              className={`rounded-md px-2 py-1 ${
-                pagination.pageSize === size
-                  ? "bg-(--admin-accent) text-white"
-                  : "border border-(--admin-border) text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover) disabled:opacity-50"
-              }`}
+              className={
+                pagination.pageSize === size ? btnSegmentActive : btnSegmentIdle
+              }
             >
               {size}
             </button>

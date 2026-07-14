@@ -4,9 +4,10 @@ import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
 import { LoginIcon } from "@/components/icons";
+import { btnPrimaryBlock } from "@/lib/button-styles";
 
 const fieldClass =
-  "w-full rounded-xl border border-(--admin-border) bg-(--admin-input-bg) px-3.5 py-3 text-sm text-(--admin-text) outline-none transition placeholder:text-(--admin-text-muted) focus:border-(--admin-accent) focus:ring-2 focus:ring-(--admin-accent)/20";
+  "w-full rounded-lg border border-(--admin-border) bg-(--admin-input-bg) px-3.5 py-3 text-sm text-(--admin-text) outline-none transition placeholder:text-(--admin-text-muted) focus:border-(--admin-accent) focus:ring-2 focus:ring-(--admin-accent)/20";
 
 export function LoginForm() {
   const router = useRouter();
@@ -101,7 +102,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-(--admin-accent) px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+        className={`group relative overflow-hidden ${btnPrimaryBlock} py-3 font-semibold`}
       >
         <span className="relative z-10 inline-flex items-center gap-2">
           <LoginIcon className="h-4 w-4 shrink-0" />

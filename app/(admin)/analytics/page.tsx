@@ -20,20 +20,21 @@ export default function AnalyticsPage() {
           actions={<RefreshButton />}
           icon={ChartIcon}
         />
-        <SuspendedSection fallbackLabel="Loading analytics…">
-          <AnalyticsBody />
+        {/* Stream overview and history independently so one does not block the other. */}
+        <SuspendedSection fallbackLabel="Loading overview…">
+          <AnalyticsOverview />
+        </SuspendedSection>
+        <SuspendedSection fallbackLabel="Loading event history…">
+          <AnalyticsHistory />
         </SuspendedSection>
       </div>
     </AnalyticsRefreshProvider>
   );
 }
 
-async function AnalyticsBody() {
+async function AnalyticsOverview() {
   try {
-    const [overview, history] = await Promise.all([
-      getAnalyticsOverview(),
-      getEventHistory(),
-    ]);
+    const overview = await getAnalyticsOverview();
 
     return (
       <div className="space-y-6">
@@ -58,32 +59,28 @@ async function AnalyticsBody() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-2">
-          <Panel title="Devices">
-            {overview.devices.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <ul className="space-y-2">
-                {overview.devices.map((device) => (
-                  <li
-                    key={device.deviceId}
-                    className="rounded-lg bg-(--admin-inset) px-3 py-2 text-sm"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-(--admin-text)">
-                        {device.label}
-                      </span>
-                      <span className="text-(--admin-accent-text)">
-                        {device.eventCount} events
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-(--admin-text-muted)">
-                      Android {device.osVersion ?? "?"} ·{" "}
-                      {device.deviceId.slice(0, 8)}…
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <Panel title="Platform track">
+            <ul className="space-y-2">
+              {overview.platforms.map((platform) => (
+                <li
+                  key={platform.platform}
+                  className="rounded-lg bg-(--admin-inset) px-3 py-3 text-sm"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium text-(--admin-text)">
+                      {platform.label}
+                    </span>
+                    <span className="text-(--admin-accent-text)">
+                      {platform.eventCount} events
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-(--admin-text-muted)">
+                    {platform.uniqueDevices} unique device
+                    {platform.uniqueDevices === 1 ? "" : "s"}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </Panel>
 
           <Panel title="Opens by calculator">
@@ -106,19 +103,30 @@ async function AnalyticsBody() {
             )}
           </Panel>
         </section>
-
-        <Panel title="Event history">
-          <EventHistoryPanel
-            initialData={{
-              events: history.events,
-              pagination: history.pagination,
-            }}
-          />
-        </Panel>
       </div>
     );
   } catch (error) {
-    console.error("Dashboard failed to load analytics:", error);
+    console.error("Dashboard failed to load analytics overview:", error);
+    return <DatabaseUnavailableInline />;
+  }
+}
+
+async function AnalyticsHistory() {
+  try {
+    const history = await getEventHistory();
+
+    return (
+      <Panel title="Event history">
+        <EventHistoryPanel
+          initialData={{
+            events: history.events,
+            pagination: history.pagination,
+          }}
+        />
+      </Panel>
+    );
+  } catch (error) {
+    console.error("Dashboard failed to load event history:", error);
     return <DatabaseUnavailableInline />;
   }
 }

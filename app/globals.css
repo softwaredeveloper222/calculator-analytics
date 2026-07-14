@@ -126,6 +126,19 @@ body {
   }
 }
 
+@keyframes nav-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.nav-progress-bar {
+  animation: nav-progress 1s ease-in-out infinite;
+}
+
 .page-transition {
   animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }

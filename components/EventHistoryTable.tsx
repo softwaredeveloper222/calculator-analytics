@@ -6,6 +6,7 @@ export type EventRow = {
   event: string;
   calculatorId: string | null;
   deviceLabel: string;
+  platform?: string;
   osVersion: string | null;
   success: boolean | null;
   createdAt: string;
@@ -88,9 +89,10 @@ export function EventHistoryTable({
                 <td className="py-2 pr-4">{event.calculatorId ?? "—"}</td>
                 <td className="py-2 pr-4">
                   <span>{event.deviceLabel}</span>
-                  {event.osVersion ? (
+                  {event.osVersion || event.platform ? (
                     <span className="block text-xs text-(--admin-text-muted)">
-                      Android {event.osVersion}
+                      {formatPlatformLabel(event.platform)}
+                      {event.osVersion ? ` ${event.osVersion}` : ""}
                     </span>
                   ) : null}
                 </td>
@@ -108,4 +110,11 @@ export function EventHistoryTable({
       </table>
     </div>
   );
+}
+
+function formatPlatformLabel(platform?: string) {
+  const value = (platform ?? "android").toLowerCase();
+  if (value === "ios") return "iOS";
+  if (value === "web") return "Web";
+  return "Android";
 }

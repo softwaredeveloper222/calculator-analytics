@@ -288,14 +288,16 @@ export async function ensureSafetyDaysPage() {
 
   if (existing) {
     const images = parseImages(existing.images);
+    // Only seed defaults when the page has never had media configured.
+    // Do not rewrite when the editor has intentionally fewer images.
     const needsImageBackfill =
-      !existing.heroImageUrl || images.length < DEFAULT_IMAGES.length;
+      !existing.heroImageUrl && images.length === 0;
 
     if (needsImageBackfill) {
       const updated = await prisma.notificationPage.update({
         where: { id: SAFETY_DAYS_ID },
         data: {
-          heroImageUrl: existing.heroImageUrl || DEFAULT_CONTENT.heroImageUrl,
+          heroImageUrl: DEFAULT_CONTENT.heroImageUrl,
           images: JSON.stringify(DEFAULT_CONTENT.images),
           registerUrl:
             existing.registerUrl?.includes("formsite.com")

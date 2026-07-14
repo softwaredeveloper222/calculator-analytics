@@ -5,11 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { PageLoadingSpinner } from "@/components/PageLoadingSpinner";
 
 type NavigationLoadingContextValue = {
   startNavigation: () => void;
@@ -30,14 +30,39 @@ export function NavigationLoadingProvider({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
+  const clearTimerRef = useRef<number | null>(null);
+
+  const clearNavigating = useCallback(() => {
+    setIsNavigating(false);
+    if (clearTimerRef.current !== null) {
+      window.clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = null;
+    }
+  }, []);
 
   const startNavigation = useCallback(() => {
     setIsNavigating(true);
+    if (clearTimerRef.current !== null) {
+      window.clearTimeout(clearTimerRef.current);
+    }
+    // Keep feedback brief; route segments stream their own data loaders.
+    clearTimerRef.current = window.setTimeout(() => {
+      setIsNavigating(false);
+      clearTimerRef.current = null;
+    }, 1200);
   }, []);
 
   useEffect(() => {
-    setIsNavigating(false);
-  }, [pathname, searchParams]);
+    clearNavigating();
+  }, [pathname, searchParams, clearNavigating]);
+
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current !== null) {
+        window.clearTimeout(clearTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -68,7 +93,7 @@ export function NavigationLoadingProvider({
         const currentPath = `${window.location.pathname}${window.location.search}`;
         if (nextPath === currentPath) return;
 
-        setIsNavigating(true);
+        startNavigation();
       } catch {
         // Ignore invalid URLs.
       }
@@ -76,20 +101,19 @@ export function NavigationLoadingProvider({
 
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, []);
+  }, [startNavigation]);
 
   return (
     <NavigationLoadingContext.Provider value={{ startNavigation }}>
-      <div
-        className={
-          isNavigating
-            ? "opacity-40 transition-opacity duration-200"
-            : "opacity-100 transition-opacity duration-300"
-        }
-      >
-        {children}
-      </div>
-      {isNavigating ? <PageLoadingSpinner label="Loading page…" /> : null}
+      {children}
+      {isNavigating ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-0 z-100 h-0.5 overflow-hidden bg-(--admin-border)"
+        >
+          <div className="nav-progress-bar h-full w-1/3 bg-(--admin-accent)" />
+        </div>
+      ) : null}
     </NavigationLoadingContext.Provider>
   );
 }
