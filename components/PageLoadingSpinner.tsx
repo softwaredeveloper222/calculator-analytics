@@ -9,7 +9,7 @@ export function PageLoadingSpinner({
     <div
       className={
         fullScreen
-          ? "fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm"
+          ? "fixed inset-0 z-[100] flex items-center justify-center bg-(--admin-overlay) backdrop-blur-sm"
           : "flex min-h-48 w-full flex-col items-center justify-center gap-3 p-10"
       }
       role="status"
@@ -19,15 +19,15 @@ export function PageLoadingSpinner({
       <div
         className={
           fullScreen
-            ? "flex flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-100 shadow-2xl"
-            : "flex flex-col items-center gap-3 text-slate-100"
+            ? "flex flex-col items-center gap-3 rounded-2xl border border-(--admin-border) bg-(--admin-panel) px-8 py-6 text-(--admin-text) shadow-2xl"
+            : "flex flex-col items-center gap-3 text-(--admin-text)"
         }
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
-          className="h-8 w-8 animate-spin text-indigo-300"
+          className="h-8 w-8 animate-spin text-(--admin-accent)"
           aria-hidden="true"
         >
           <circle
@@ -45,7 +45,7 @@ export function PageLoadingSpinner({
             strokeLinecap="round"
           />
         </svg>
-        <p className="text-sm text-slate-300">{label}</p>
+        <p className="text-sm text-(--admin-text-secondary)">{label}</p>
       </div>
     </div>
   );

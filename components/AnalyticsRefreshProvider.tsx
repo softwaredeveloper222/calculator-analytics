@@ -77,17 +77,17 @@ export function useAnalyticsRefresh() {
 function ScreenLoadingOverlay() {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--admin-overlay) backdrop-blur-sm"
       role="status"
       aria-live="polite"
       aria-label="Refreshing dashboard"
     >
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-100 shadow-2xl">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-(--admin-border) bg-(--admin-panel) px-8 py-6 text-(--admin-text) shadow-2xl">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
-          className="h-8 w-8 animate-spin text-indigo-300"
+          className="h-8 w-8 animate-spin text-(--admin-accent)"
           aria-hidden="true"
         >
           <circle
@@ -105,7 +105,7 @@ function ScreenLoadingOverlay() {
             strokeLinecap="round"
           />
         </svg>
-        <p className="text-sm text-slate-300">Refreshing…</p>
+        <p className="text-sm text-(--admin-text-secondary)">Refreshing…</p>
       </div>
     </div>
   );

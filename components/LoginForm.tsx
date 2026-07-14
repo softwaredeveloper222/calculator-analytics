@@ -3,6 +3,10 @@
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNavigationLoading } from "@/components/NavigationLoadingProvider";
+import { LoginIcon } from "@/components/icons";
+
+const fieldClass =
+  "w-full rounded-xl border border-(--admin-border) bg-(--admin-input-bg) px-3.5 py-3 text-sm text-(--admin-text) outline-none transition placeholder:text-(--admin-text-muted) focus:border-(--admin-accent) focus:ring-2 focus:ring-(--admin-accent)/20";
 
 export function LoginForm() {
   const router = useRouter();
@@ -45,9 +49,12 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2.5">
-        <label htmlFor="username" className="block text-base text-slate-300">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-2">
+        <label
+          htmlFor="username"
+          className="block text-xs font-medium tracking-wide text-(--admin-text-muted) uppercase"
+        >
           Username
         </label>
         <input
@@ -56,13 +63,17 @@ export function LoginForm() {
           autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 outline-none focus:border-indigo-400"
+          className={fieldClass}
+          placeholder="Admin username"
           required
         />
       </div>
 
-      <div className="space-y-2.5">
-        <label htmlFor="password" className="block text-base text-slate-300">
+      <div className="space-y-2">
+        <label
+          htmlFor="password"
+          className="block text-xs font-medium tracking-wide text-(--admin-text-muted) uppercase"
+        >
           Password
         </label>
         <input
@@ -72,23 +83,34 @@ export function LoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 outline-none focus:border-indigo-400"
+          className={fieldClass}
+          placeholder="••••••••"
           required
         />
       </div>
 
       {error ? (
-        <p className="text-base text-rose-300" role="alert">
+        <div
+          className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-700"
+          role="alert"
+        >
           {error}
-        </p>
+        </div>
       ) : null}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-indigo-500 px-5 py-3.5 text-base font-medium text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-(--admin-accent) px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSubmitting ? "Signing in…" : "Sign in"}
+        <span className="relative z-10 inline-flex items-center gap-2">
+          <LoginIcon className="h-4 w-4 shrink-0" />
+          {isSubmitting ? "Signing in…" : "Sign in"}
+        </span>
+        <span
+          aria-hidden
+          className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition duration-700 group-hover:translate-x-full"
+        />
       </button>
     </form>
   );

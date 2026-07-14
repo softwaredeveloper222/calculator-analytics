@@ -1,5 +1,5 @@
 import { PageLoadingSpinner } from "@/components/PageLoadingSpinner";
 
 export default function Loading() {
-  return <PageLoadingSpinner label="Loading analytics…" />;
+  return <PageLoadingSpinner label="Loading analytics…" fullScreen={false} />;
 }

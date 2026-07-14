@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavigationLoadingProvider } from "@/components/NavigationLoadingProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GCAP Calculator Analytics",
-  description: "Calculator usage analytics for the GCAP Android app",
+  title: "GCAP Admin",
+  description: "Safety Days CMS and calculator analytics for GCAP",
 };
+
+const themeInitScript = `(function(){try{var t=localStorage.getItem('gcap-admin-theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
 export default function RootLayout({
   children,
@@ -27,12 +30,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="light"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
-        <Suspense fallback={null}>
-          <NavigationLoadingProvider>{children}</NavigationLoadingProvider>
-        </Suspense>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="flex min-h-full flex-col font-sans">
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <NavigationLoadingProvider>{children}</NavigationLoadingProvider>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

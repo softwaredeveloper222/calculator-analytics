@@ -26,7 +26,7 @@ export function EventHistoryTable({
 }: EventHistoryTableProps) {
   if (events.length === 0) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-(--admin-text-muted)">
         No events found for this page.
       </p>
     );
@@ -39,7 +39,7 @@ export function EventHistoryTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[800px] text-left text-sm">
-        <thead className="text-slate-400">
+        <thead className="text-(--admin-text-muted)">
           <tr>
             <th className="pb-2 pr-3 font-medium">
               <input
@@ -50,7 +50,7 @@ export function EventHistoryTable({
                 }}
                 onChange={onToggleAll}
                 aria-label="Select all on this page"
-                className="h-4 w-4 rounded border-slate-600 bg-slate-950 accent-indigo-500"
+                className="h-4 w-4 rounded border-(--admin-border) bg-(--admin-input-bg) accent-(--admin-accent)"
               />
             </th>
             <th className="pb-2 pr-4 font-medium">Time</th>
@@ -68,8 +68,8 @@ export function EventHistoryTable({
               <tr
                 key={event.id}
                 onClick={() => onToggle(event.id)}
-                className={`cursor-pointer border-t border-slate-800 text-slate-300 transition-colors hover:bg-slate-900/60 ${
-                  isSelected ? "bg-indigo-500/10" : ""
+                className={`cursor-pointer border-t border-(--admin-border) text-(--admin-text-secondary) transition-colors hover:bg-(--admin-btn-secondary-hover) ${
+                  isSelected ? "bg-(--admin-accent-soft)" : ""
                 }`}
               >
                 <td className="py-2 pr-3" onClick={(e) => e.stopPropagation()}>
@@ -78,7 +78,7 @@ export function EventHistoryTable({
                     checked={isSelected}
                     onChange={() => onToggle(event.id)}
                     aria-label={`Select event ${event.id}`}
-                    className="h-4 w-4 cursor-pointer rounded border-slate-600 bg-slate-950 accent-indigo-500"
+                    className="h-4 w-4 cursor-pointer rounded border-(--admin-border) bg-(--admin-input-bg) accent-(--admin-accent)"
                   />
                 </td>
                 <td className="py-2 pr-4 whitespace-nowrap">
@@ -89,7 +89,7 @@ export function EventHistoryTable({
                 <td className="py-2 pr-4">
                   <span>{event.deviceLabel}</span>
                   {event.osVersion ? (
-                    <span className="block text-xs text-slate-500">
+                    <span className="block text-xs text-(--admin-text-muted)">
                       Android {event.osVersion}
                     </span>
                   ) : null}

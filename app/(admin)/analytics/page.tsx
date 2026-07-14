@@ -1,12 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  AdminPageShell,
-  SuspendedSection,
-} from "@/components/AdminPageShell";
+import { AdminPageHeader } from "@/components/AdminPageHeader";
 import { AnalyticsRefreshProvider } from "@/components/AnalyticsRefreshProvider";
 import { EventHistoryPanel } from "@/components/EventHistoryPanel";
 import { RefreshButton } from "@/components/RefreshButton";
+import { SuspendedSection } from "@/components/SuspendedSection";
+import { ChartIcon } from "@/components/icons";
 import { getAnalyticsOverview, getEventHistory } from "@/lib/analytics-queries";
 
 export const dynamic = "force-dynamic";
@@ -14,18 +13,17 @@ export const dynamic = "force-dynamic";
 export default function AnalyticsPage() {
   return (
     <AnalyticsRefreshProvider>
-      <AdminPageShell
-        current="analytics"
-        eyebrow="GCAP Calculator Analytics"
-        title="Usage Dashboard"
-        description="Live data from the mobile app. Use pagination below to browse past events."
-        actions={<RefreshButton />}
-        wide
-      >
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="Analytics"
+          description="Live data from the mobile app. Use pagination below to browse past events."
+          actions={<RefreshButton />}
+          icon={ChartIcon}
+        />
         <SuspendedSection fallbackLabel="Loading analytics…">
           <AnalyticsBody />
         </SuspendedSection>
-      </AdminPageShell>
+      </div>
     </AnalyticsRefreshProvider>
   );
 }
@@ -38,7 +36,7 @@ async function AnalyticsBody() {
     ]);
 
     return (
-      <>
+      <div className="space-y-6">
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Total events (30d)" value={overview.totalEvents} />
           <StatCard label="Unique devices" value={overview.uniqueDevices} />
@@ -68,17 +66,17 @@ async function AnalyticsBody() {
                 {overview.devices.map((device) => (
                   <li
                     key={device.deviceId}
-                    className="rounded-lg bg-slate-950 px-3 py-2 text-sm"
+                    className="rounded-lg bg-(--admin-inset) px-3 py-2 text-sm"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-slate-200">
+                      <span className="font-medium text-(--admin-text)">
                         {device.label}
                       </span>
-                      <span className="text-indigo-300">
+                      <span className="text-(--admin-accent-text)">
                         {device.eventCount} events
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-(--admin-text-muted)">
                       Android {device.osVersion ?? "?"} ·{" "}
                       {device.deviceId.slice(0, 8)}…
                     </p>
@@ -96,12 +94,12 @@ async function AnalyticsBody() {
                 {overview.opensByCalculator.map((row) => (
                   <li
                     key={row.calculatorId}
-                    className="flex items-center justify-between rounded-lg bg-slate-950 px-3 py-2 text-sm"
+                    className="flex items-center justify-between rounded-lg bg-(--admin-inset) px-3 py-2 text-sm"
                   >
-                    <span className="font-medium text-slate-200">
+                    <span className="font-medium text-(--admin-text)">
                       {row.calculatorId}
                     </span>
-                    <span className="text-indigo-300">{row.count}</span>
+                    <span className="text-(--admin-accent-text)">{row.count}</span>
                   </li>
                 ))}
               </ul>
@@ -117,7 +115,7 @@ async function AnalyticsBody() {
             }}
           />
         </Panel>
-      </>
+      </div>
     );
   } catch (error) {
     console.error("Dashboard failed to load analytics:", error);
@@ -127,9 +125,13 @@ async function AnalyticsBody() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
+    <div className="glass-panel rounded-2xl p-4 transition hover:border-(--admin-border-strong)">
+      <p className="text-xs font-medium tracking-wide text-(--admin-text-muted) uppercase">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-(--admin-text)">
+        {value}
+      </p>
     </div>
   );
 }
@@ -142,8 +144,10 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="mb-4 text-lg font-semibold">{title}</h2>
+    <section className="glass-panel rounded-2xl p-5">
+      <h2 className="mb-4 text-sm font-semibold tracking-tight text-(--admin-text)">
+        {title}
+      </h2>
       {children}
     </section>
   );
@@ -151,7 +155,7 @@ function Panel({
 
 function EmptyState() {
   return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-(--admin-text-muted)">
       No events yet. Open Calculators in the app, tap Calculate, then refresh
       this page.
     </p>
@@ -160,15 +164,15 @@ function EmptyState() {
 
 function DatabaseUnavailableInline() {
   return (
-    <section className="rounded-2xl border border-rose-500/30 bg-slate-900 p-6 text-sm text-slate-300">
-      <p className="font-medium text-rose-300">Could not load analytics</p>
-      <p className="mt-2 text-slate-400">
+    <section className="glass-panel rounded-2xl border-rose-500/30 p-5 text-sm text-(--admin-text-secondary)">
+      <p className="font-medium text-rose-600">Could not load analytics</p>
+      <p className="mt-2 text-(--admin-text-muted)">
         The dashboard could not connect to Supabase. VPN and pool timeouts are
         the usual cause locally.
       </p>
       <Link
         href="/api/health"
-        className="mt-4 inline-block text-indigo-300 hover:underline"
+        className="mt-4 inline-block text-(--admin-accent-text) hover:underline"
       >
         Check API health →
       </Link>

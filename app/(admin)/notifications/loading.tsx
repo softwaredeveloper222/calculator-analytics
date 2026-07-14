@@ -1,5 +1,7 @@
 import { PageLoadingSpinner } from "@/components/PageLoadingSpinner";
 
 export default function Loading() {
-  return <PageLoadingSpinner label="Loading notifications…" />;
+  return (
+    <PageLoadingSpinner label="Loading notifications…" fullScreen={false} />
+  );
 }

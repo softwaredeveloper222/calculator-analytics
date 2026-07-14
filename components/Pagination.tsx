@@ -18,8 +18,8 @@ export function Pagination({
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
-    <div className="flex flex-col gap-4 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-slate-400">
+    <div className="flex flex-col gap-4 border-t border-(--admin-border) pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-(--admin-text-muted)">
         Page {page} of {totalPages} · {totalEvents} total events
       </p>
 
@@ -32,7 +32,10 @@ export function Pagination({
 
         {pageNumbers.map((pageNumber, index) =>
           pageNumber === "…" ? (
-            <span key={`ellipsis-${index}`} className="px-2 text-slate-500">
+            <span
+              key={`ellipsis-${index}`}
+              className="px-2 text-(--admin-text-muted)"
+            >
               …
             </span>
           ) : (
@@ -43,8 +46,8 @@ export function Pagination({
               onClick={() => onPageChange(pageNumber)}
               className={`min-w-9 rounded-lg px-3 py-2 text-center text-sm ${
                 pageNumber === page
-                  ? "bg-indigo-500 text-white"
-                  : "border border-slate-700 text-slate-300 hover:bg-slate-900 disabled:opacity-50"
+                  ? "bg-(--admin-accent) text-white"
+                  : "border border-(--admin-border) text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover) disabled:opacity-50"
               }`}
             >
               {pageNumber}
@@ -82,8 +85,8 @@ function PageButton({
       title={label}
       className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border ${
         disabled
-          ? "border-slate-800 text-slate-600"
-          : "border-slate-700 text-slate-300 hover:bg-slate-900"
+          ? "border-(--admin-border) text-(--admin-text-muted) opacity-50"
+          : "border-(--admin-border) text-(--admin-text-secondary) hover:bg-(--admin-btn-secondary-hover)"
       }`}
     >
       <ChevronIcon direction={direction} />

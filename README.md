@@ -42,15 +42,12 @@ Open [http://localhost:3000](http://localhost:3000) — you will be redirected t
 | `ADMIN_USERNAME` | Shared admin login username |
 | `ADMIN_PASSWORD` | Shared admin login password |
 | `AUTH_SECRET` | Secret used to sign the admin session cookie |
+| `ONESIGNAL_APP_ID` | OneSignal App ID (Keys & IDs). Used when **Notify** sends a push. |
+| `ONESIGNAL_REST_API_KEY` | OneSignal REST API Key (server). Never ship this in mobile apps. |
 
 In development, if `ANALYTICS_API_KEY` is unset, API-key auth is skipped. Set it before deploying.
 
-## Admin app
-
-1. Sign in at `/login`
-2. Hub at `/hub` — choose **Notification** or **Calculator Analytics**
-3. `/notifications` — edit Safety Days content, **Save**, then **Notify**
-4. `/analytics` — existing usage dashboard
+If OneSignal env vars are missing, **Notify** still bumps `version` / `publishedAt`, but no push is sent (response includes a `warning`).
 
 ### Mobile notification API
 
@@ -60,6 +57,8 @@ Authorization: Bearer <ANALYTICS_API_KEY>
 ```
 
 Returns the published Safety Days payload and a `version` the Android app can poll.
+
+**Notify** (`POST /api/notifications/safety-days/notify`, admin session) publishes a new version and, when OneSignal is configured, broadcasts a push with `data.type = "safety_days"` so apps can open the Safety Days screen.
 
 ## API
 
@@ -109,6 +108,7 @@ Database connectivity check (no auth).
    - `DIRECT_URL` (direct/session connection, port 5432)
    - `ANALYTICS_API_KEY` (strong secret for the Android app)
    - `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `AUTH_SECRET`
+   - `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY` (for Safety Days push on Notify)
 3. Redeploy the project.
 4. Verify: `https://<your-app>.vercel.app/api/health` should return `"database": "connected"`.
 
